@@ -25,6 +25,7 @@ The original intent was to use NSG flow logs. That conflicts with the current Az
 - keep multi-VNet analysis explicit per covered VNet or equivalent scope fragment rather than blending findings across covered VNets
 - keep reusable KQL contracts schema-safe across tenant variations where practical
 - allow an optional post-workshop remediation artifact that contains review-only CLI commands to enable VNet flow logs to a chosen workspace when the customer explicitly asks
+- keep any generated firewall-rule artifact limited to review-only infrastructure-as-code output and never apply or populate live Azure Firewall rules automatically during the workshop
 
 ## Out of scope
 
@@ -40,6 +41,8 @@ The original intent was to use NSG flow logs. That conflicts with the current Az
 ## Approval boundary
 
 The repository can create the Azure Firewall Policy resource, but the rule collections must remain empty or sample-only until explicit approval is given.
+
+Any workshop-generated firewall-rule output must remain a local infrastructure-as-code draft only. It is not a live rule change and must not be applied automatically.
 
 ## Simplicity decision
 

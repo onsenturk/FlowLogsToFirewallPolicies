@@ -1,6 +1,6 @@
 # Copilot workshop prompt library
 
-Use these prompts in order for customer workshops that analyze existing Azure flow logs and generate review-only Azure Firewall drafts.
+Use these prompts in order for customer workshops that analyze existing Azure flow logs and generate review-only Azure Firewall infrastructure-as-code drafts.
 
 ## Quick Start
 
@@ -43,6 +43,7 @@ Optional post-workshop step:
 - Ask once before creating local request artifacts.
 - Keep all outputs under `requests/<datetime>/`.
 - Treat every output as review-only until explicitly approved.
+- Treat firewall draft outputs as local IaC artifacts only. They must not create, modify, or deploy live Azure Firewall rules automatically.
 
 ## Discovery handoff
 
@@ -58,5 +59,6 @@ Optional post-workshop step:
 - `output-log-<region>.md` when output capture is requested
 - `validation-questions-<region>.md`
 - `firewall-rules-draft-<region>.bicepparam`
+- `firewall-rules-draft-<region>.bicepparam` - review-only IaC draft only
 - Optional: `remediation-commands-<region>.md`
 - Optional: `discovery-summary-<region>.md`

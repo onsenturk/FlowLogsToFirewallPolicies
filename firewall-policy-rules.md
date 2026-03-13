@@ -4,6 +4,8 @@
 
 This repository is designed so that Azure Firewall Policy rule collections stay empty or sample-only until you approve them.
 
+Any workshop-generated firewall output is a review-only infrastructure-as-code draft. It does not create or modify live Azure Firewall rules by itself.
+
 ## Rule sources of truth
 
 Use these sources in order:

@@ -16,6 +16,7 @@ name: "Azure Firewall Workshop Guardrails"
 - If the requested production scope includes a hub, transit, shared-services, or otherwise central VNet and that VNet lacks observed coverage, do not generate a full-scope firewall draft unless the customer explicitly narrows the scope or accepts a partial review-only draft.
 - If a reusable KQL contract fails because a workspace schema differs from the template, adapt the query with schema-safe expressions such as `column_ifexists(...)`, record that adaptation as an assumption or workflow gap, and avoid presenting the failed template as authoritative.
 - Do not deploy Bicep, modify Azure resources, or suggest running deployment commands during the workshop flow.
+- Do not create or modify live Azure Firewall rule collections during the workshop flow. Firewall outputs must remain review-only infrastructure-as-code drafts until explicitly approved and deployed outside the workshop.
 - Do not generate enablement or remediation commands during the default workshop flow. Only generate review-only CLI remediation guidance if the customer explicitly asks for it after the analysis findings are complete.
 - Ask once for confirmation before creating `requests/<datetime>/` and any draft artifacts for that request.
 - Keep generated files review-only and approval-pending.
@@ -41,7 +42,7 @@ name: "Azure Firewall Workshop Guardrails"
 - `traffic-summary-<region>.md` - must persist the confirmed VNet scope, per-VNet evidence source, covered VNets, and uncovered VNets
 - `output-log-<region>.md` - should capture material workflow outputs such as discovery results, classifications, exclusions, and created artifacts without logging the user prompts verbatim
 - `validation-questions-<region>.md` - should include follow-up questions for uncovered VNets or coverage gaps
-- `firewall-rules-draft-<region>.bicepparam`
+- `firewall-rules-draft-<region>.bicepparam` - review-only infrastructure-as-code draft, never a live rule change
 - Optional: `remediation-commands-<region>.md`
 - Optional: `discovery-summary-<region>.md`
 

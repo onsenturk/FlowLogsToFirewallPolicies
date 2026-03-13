@@ -2,6 +2,8 @@
 
 This repository provisions the observability resources needed to discover Azure traffic patterns before enforcing Azure Firewall rules.
 
+Any firewall-rule output from the workshop remains a local, review-only infrastructure-as-code draft. The workflow does not create, populate, or deploy live Azure Firewall rule collections automatically.
+
 ## Why this repository uses virtual network flow logs
 
 New NSG flow logs can no longer be created after June 30, 2025. Because of that Azure platform constraint, this repository uses virtual network flow logs instead of NSG flow logs for new deployments. The design still supports the original objective:
@@ -26,7 +28,7 @@ New NSG flow logs can no longer be created after June 30, 2025. Because of that 
 - [infra/main.sample.bicepparam](infra/main.sample.bicepparam) - sample parameter file
 - [infra/modules/monitoring-stack.bicep](infra/modules/monitoring-stack.bicep) - shared monitoring resources
 - [infra/modules/flow-log.bicep](infra/modules/flow-log.bicep) - regional virtual network flow log deployment
-- [infra/firewall-policy-rules.sample.bicepparam](infra/firewall-policy-rules.sample.bicepparam) - approved-rule template only
+- [infra/firewall-policy-rules.sample.bicepparam](infra/firewall-policy-rules.sample.bicepparam) - approved-rule template only, used as the shape for review-only IaC drafts
 - [queries/recommended-rules-by-vnet.kql](queries/recommended-rules-by-vnet.kql) - Traffic Analytics recommendation query
 - [queries/rule-candidates-summary.kql](queries/rule-candidates-summary.kql) - summarized rule candidate query
 - [queries/existing-flow-logs-discovery.kql](queries/existing-flow-logs-discovery.kql) - discovery query for the current tenant setup
@@ -88,7 +90,7 @@ Expected workshop outputs:
 - `traffic-summary-<region>.md`
 - `output-log-<region>.md` when the customer wants a concise record of material workflow outputs
 - `validation-questions-<region>.md`
-- `firewall-rules-draft-<region>.bicepparam`
+- `firewall-rules-draft-<region>.bicepparam` - review-only IaC draft only, not a deployed ruleset
 - optional `remediation-commands-<region>.md`
 
 The workflow uses managed identity with Azure CLI in customer environments and does not deploy or modify Azure resources during discovery.

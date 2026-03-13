@@ -49,7 +49,7 @@ The repository now also contains a GitHub Copilot-first workflow layer for custo
 8. The discovery flow analyzes internal traffic, north-south egress, and public inbound exposure for the covered VNets only, keeping the findings explicit per covered VNet or equivalent scope fragment and preserving the evidence source by VNet.
 9. Copilot asks once for confirmation before creating any local request artifacts.
 10. The drafting agent writes review-only outputs under `requests/<datetime>/`.
-11. Generated firewall rule content remains approval-pending and is not deployed automatically.
+11. Generated firewall rule content remains a local infrastructure-as-code draft, stays approval-pending, and is not deployed or applied automatically.
 12. If the customer explicitly asks for remediation guidance after the workshop, the workflow may generate a separate review-only artifact with CLI commands to enable VNet flow logs to the chosen workspace.
 
 ## Security model
