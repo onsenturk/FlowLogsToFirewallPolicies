@@ -18,4 +18,4 @@ NTANetAnalytics
     Protocols = make_set(L7Protocol, 10),
     SampleTags = make_set(DestServiceTags, 5)
   by TargetResourceId, SrcSubnet, NormalizedService
-| order by BytesSent desc, Records desc
+| top 500 by BytesSent desc, Records desc

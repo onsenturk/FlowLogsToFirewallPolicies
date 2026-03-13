@@ -12,4 +12,4 @@ NTANetAnalytics
     SampleSourceIps = make_set(SrcPublicIps, 3),
     SampleSourceTags = make_set(SrcServiceTags, 3)
   by FlowType, DestSubnet, DestPort, L4Protocol, L7Protocol, AclRule
-| order by BytesIn desc, Records desc
+| top 500 by BytesIn desc, Records desc

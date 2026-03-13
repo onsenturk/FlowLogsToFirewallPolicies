@@ -4,27 +4,48 @@ Use these prompts in order for customer workshops that analyze existing Azure fl
 
 ## Quick Start
 
-- Start the workflow with natural language such as `start` or `start the Azure Firewall workshop`, or use `/01-start-workshop` when you want the explicit prompt entry point.
-- The startup flow first checks Azure sign-in state, confirms the tenant, and asks whether the customer wants to provide a specific Log Analytics workspace or discover candidate workspaces.
+- Start the workflow with natural language such as `start` or `start the Azure Firewall workshop`, or use `/00-choose-flow` to explicitly select between providing a known workspace or running dynamic discovery.
+- The startup flow first checks Azure sign-in state, confirms the tenant, and asks whether the customer wants to provide a specific Log Analytics workspace (predefined flow) or discover candidate workspaces dynamically.
 - Workspace discovery then identifies which candidate workspaces appear to contain relevant VNet flow-log evidence and asks the customer to choose one before scope confirmation begins.
 
 ## Execution order
 
-1. `/01-start-workshop`
-2. `/02-discover-workspaces`
-3. `/03-confirm-workspace-and-scope`
-4. `/04-analyze-internal-traffic`
-5. `/05-analyze-egress-and-exposure`
-6. `/06-generate-customer-questions`
-7. `/07-confirm-output-creation`
-8. `/08-create-traffic-summary`
-9. `/08a-create-output-log` when the user wants a review-only record of material workflow outputs inside the request folder
-10. `/09-generate-firewall-draft`
-11. `/10-close-workshop`
+1. `/00-choose-flow` — choose predefined (workspace already known) or dynamic discovery
+2. `/01-start-workshop` — validate Azure access, confirm tenant, lock read-only guardrails
+3. `/02-discover-workspaces` — only if dynamic discovery was chosen in step 1
+4. `/03-confirm-workspace-and-scope`
+5. `/04-analyze-internal-traffic`
+6. `/05-analyze-egress-and-exposure`
+7. `/05a-create-traffic-diagram` — optional Mermaid traffic flow diagram
+8. `/05b-summarize-rules` — summarize candidate rules before generating the draft
+9. `/06-generate-customer-questions`
+10. `/07-confirm-output-creation`
+11. `/08-create-traffic-summary`
+12. `/08a-create-output-log` when the user wants a review-only record of material workflow outputs inside the request folder
+13. `/09-generate-firewall-draft`
+14. `/10-close-workshop`
 
 Optional post-workshop step:
 
-12. `/11-generate-remediation-commands` only when the customer explicitly asks for review-only CLI commands to enable VNet flow logs to a chosen workspace
+15. `/11-generate-remediation-commands` only when the customer explicitly asks for review-only CLI commands to enable VNet flow logs to a chosen workspace
+
+## Predefined vs dynamic discovery
+
+**Predefined flow** (`/00-choose-flow` → Path A):
+- Use when the Log Analytics workspace, tenant, and subscription are already known.
+- The customer provides workspace name or resource ID, tenant ID, subscription ID, and preferred analysis timeframe.
+- Skips `/02-discover-workspaces` and goes directly to `/03-confirm-workspace-and-scope`.
+
+**Dynamic discovery** (`/00-choose-flow` → Path B):
+- Use when the workspace is not yet known or when reviewing all candidate workspaces is preferred.
+- The customer provides only tenant ID and optional region or subscription hints.
+- Runs the full discovery flow through `/02-discover-workspaces` before scope confirmation.
+
+## Large environment guidance
+
+All KQL queries include a `topRowLimit` or `top N` clause to prevent query timeouts on large tenants. The default limit is `500` rows for traffic analysis queries and `200` rows for rule recommendation queries. Operators can increase these limits if the environment is known to produce more significant flows, but should validate that the workspace query timeout setting supports longer-running queries before doing so.
+
+If a query returns exactly the row limit, there may be truncated results. The workflow records this as an explicit exclusion in the traffic summary and output log.
 
 ## Guardrails
 
@@ -50,6 +71,7 @@ Optional post-workshop step:
 - `/02-discover-workspaces` should end by asking the exact follow-up question that makes the customer choose the workspace for the rest of the analysis.
 - `/03-confirm-workspace-and-scope` is the hard handoff gate after workspace selection and should return the confirmed timeframe, evidence source by VNet, covered VNets, excluded VNets, and any remaining gaps before prompts 04 and 05 are used.
 - `/04-analyze-internal-traffic` and `/05-analyze-egress-and-exposure` should keep `scopeHint` explicit by running once per covered VNet or equivalent resource scope fragment when more than one covered VNet remains, and the returned analysis should stay segmented by that explicit scope.
+- `/05b-summarize-rules` runs after analysis is complete and before output creation is confirmed. It produces the candidate rule set that feeds `/09-generate-firewall-draft`.
 - Request artifacts should persist the confirmed VNet scope, evidence source by VNet, covered VNets, and uncovered VNets rather than relying on chat context only.
 - If output capture is requested, the drafting flow should also create `output-log-<region>.md` with substantive workflow outputs only, not the raw user prompts.
 
@@ -58,7 +80,7 @@ Optional post-workshop step:
 - `traffic-summary-<region>.md`
 - `output-log-<region>.md` when output capture is requested
 - `validation-questions-<region>.md`
-- `firewall-rules-draft-<region>.bicepparam`
-- `firewall-rules-draft-<region>.bicepparam` - review-only IaC draft only
+- `firewall-rules-draft-<region>.bicepparam` — review-only IaC draft only
+- Optional: `traffic-diagram-<region>.md` when the customer requests a visual traffic summary
 - Optional: `remediation-commands-<region>.md`
 - Optional: `discovery-summary-<region>.md`

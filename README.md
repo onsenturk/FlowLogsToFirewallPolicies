@@ -31,6 +31,7 @@ New NSG flow logs can no longer be created after June 30, 2025. Because of that 
 - [infra/firewall-policy-rules.sample.bicepparam](infra/firewall-policy-rules.sample.bicepparam) - approved-rule template only, used as the shape for review-only IaC drafts
 - [queries/recommended-rules-by-vnet.kql](queries/recommended-rules-by-vnet.kql) - Traffic Analytics recommendation query
 - [queries/rule-candidates-summary.kql](queries/rule-candidates-summary.kql) - summarized rule candidate query
+- [queries/rule-summary-paginated.kql](queries/rule-summary-paginated.kql) - paginated rule summary query for large environments; adjust `topRowLimit` as needed
 - [queries/existing-flow-logs-discovery.kql](queries/existing-flow-logs-discovery.kql) - discovery query for the current tenant setup
 - [queries/existing-recommended-rules.kql](queries/existing-recommended-rules.kql) - rule recommendations for the currently covered VNets
 - [queries/existing-east-west-candidates.kql](queries/existing-east-west-candidates.kql) - east-west candidate flow analysis for the current VNets
@@ -62,22 +63,25 @@ This repository now includes a GitHub Copilot-first customer workshop workflow.
 
 Use the workflow like this:
 
-1. start with natural language such as `start` or with `/01-start-workshop`
-2. confirm Azure sign-in state and tenant before discovery begins
-3. choose whether to provide a specific Log Analytics workspace or let the workflow discover candidate workspaces in the selected tenant
-4. verify that Azure CLI and any extension-backed or MCP-backed Azure tooling are aligned to the same tenant and subscription before trusting discovery results
-5. let the discovery flow enumerate candidate subscriptions, identify which candidate workspaces appear to contain relevant VNet flow-log evidence, and ask the customer to choose the workspace to analyze
-6. confirm region only if it is still needed, then confirm the intended VNet scope and analysis timeframe, and validate the evidence source for each confirmed VNet as `VNetFlowLogs`, `NSGFlowLogsFallback`, or `Uncovered`
-7. if an uncovered VNet is a hub, transit, or shared-services VNet in the requested production scope, stop the full-scope draft unless the customer narrows scope or explicitly accepts a partial review-only output
-8. validate freshness and analyze only the covered VNets, while carrying uncovered VNets forward as explicit exclusions
-9. keep internal, egress, and exposure findings explicit per covered VNet or equivalent scope fragment rather than blending them into a single undifferentiated summary
-10. if a reusable KQL query fails because of schema drift in the selected workspace, rerun it with schema-safe expressions and record that adaptation in the output
-11. ask once before creating any local draft artifacts
-12. write review-only outputs under `requests/<datetime>/`, persisting the confirmed VNet scope, covered VNets, uncovered VNets, and any requested material output log in the request artifacts
+1. start with `/00-choose-flow` to select between predefined flow (workspace already known) and dynamic discovery; alternatively use natural language such as `start` or `/01-start-workshop`
+2. **predefined flow** — provide the Log Analytics workspace name or resource ID, tenant ID, subscription ID, and preferred analysis timeframe, then skip to workspace validation
+3. **dynamic discovery** — provide only the tenant ID and optional hints; let the workflow enumerate candidate subscriptions and workspaces
+4. confirm Azure sign-in state and tenant before discovery begins
+5. verify that Azure CLI and any extension-backed or MCP-backed Azure tooling are aligned to the same tenant and subscription before trusting discovery results
+6. let the discovery flow enumerate candidate subscriptions, identify which candidate workspaces appear to contain relevant VNet flow-log evidence, and ask the customer to choose the workspace to analyze
+7. confirm region only if it is still needed, then confirm the intended VNet scope and analysis timeframe, and validate the evidence source for each confirmed VNet as `VNetFlowLogs`, `NSGFlowLogsFallback`, or `Uncovered`
+8. if an uncovered VNet is a hub, transit, or shared-services VNet in the requested production scope, stop the full-scope draft unless the customer narrows scope or explicitly accepts a partial review-only output
+9. validate freshness and analyze only the covered VNets, while carrying uncovered VNets forward as explicit exclusions
+10. keep internal, egress, and exposure findings explicit per covered VNet or equivalent scope fragment rather than blending them into a single undifferentiated summary
+11. optionally use `/05a-create-traffic-diagram` to produce a Mermaid traffic flow diagram from the discovered flows
+12. use `/05b-summarize-rules` to produce a structured rule candidate summary before generating the firewall draft; this step also applies result-row limits to prevent issues in large environments
+13. if a reusable KQL query fails because of schema drift in the selected workspace, rerun it with schema-safe expressions and record that adaptation in the output
+14. ask once before creating any local draft artifacts
+15. write review-only outputs under `requests/<datetime>/`, persisting the confirmed VNet scope, covered VNets, uncovered VNets, and any requested material output log in the request artifacts
 
 Optional post-workshop step:
 
-11. if the customer explicitly asks for remediation guidance, generate a review-only `remediation-commands-<region>.md` artifact with Azure CLI commands to enable VNet flow logs to the chosen workspace
+16. if the customer explicitly asks for remediation guidance, generate a review-only `remediation-commands-<region>.md` artifact with Azure CLI commands to enable VNet flow logs to the chosen workspace
 
 Supported analysis timeframes are the standard workshop choices `7d`, `14d`, `30d`, `60d`, and `90d`, plus custom KQL-compatible duration values such as `21d` when the customer requests a different lookback window.
 
@@ -85,12 +89,24 @@ The discovery flow now treats VNet flow-log coverage as a pre-analysis scope che
 
 If the workflow encounters a prompt or instruction gap during a workshop run, it should surface recommendation-only improvements for future runs instead of editing the repo during customer execution.
 
+### Large environment guidance
+
+All KQL queries in this repository include a `top N` clause to prevent query timeouts in large tenants:
+
+- Traffic analysis queries default to `top 500` rows per covered VNet.
+- Rule recommendation queries default to `top 200` rows per covered VNet.
+
+If a query returns exactly the row limit, results may be truncated. The workflow records this as an explicit exclusion in the traffic summary and output log. Operators can increase the limit by editing the `topRowLimit` variable in the relevant query, but should first validate that the workspace query timeout setting supports longer-running queries.
+
+For very large environments, prefer running one query per covered VNet using the `scopeHint` variable rather than running a single region-wide query.
+
 Expected workshop outputs:
 
 - `traffic-summary-<region>.md`
 - `output-log-<region>.md` when the customer wants a concise record of material workflow outputs
 - `validation-questions-<region>.md`
 - `firewall-rules-draft-<region>.bicepparam` - review-only IaC draft only, not a deployed ruleset
+- optional `traffic-diagram-<region>.md` when the customer requests a visual summary
 - optional `remediation-commands-<region>.md`
 
 The workflow uses managed identity with Azure CLI in customer environments and does not deploy or modify Azure resources during discovery.

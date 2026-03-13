@@ -1,11 +1,14 @@
-// Replace the sample values before execution.
+// Paginated rule summary for large environments.
+// Replace the placeholders before running the query.
+// Use topRowLimit to cap results per VNet and prevent query timeouts on large tenants.
+// Increase topRowLimit incrementally if the default is too restrictive for your environment.
+let lookback = 30d;
+let topRowLimit = 200;
 let CoveredVnets = dynamic([
-  '/subscriptions/<subscription-id>/resourceGroups/<resource-group>/providers/Microsoft.Network/virtualNetworks/<vnet-name-1>',
-  '/subscriptions/<subscription-id>/resourceGroups/<resource-group>/providers/Microsoft.Network/virtualNetworks/<vnet-name-2>',
-  '/subscriptions/<subscription-id>/resourceGroups/<resource-group>/providers/Microsoft.Network/virtualNetworks/<vnet-name-3>'
+  '/subscriptions/<subscription-id>/resourceGroups/<resource-group>/providers/Microsoft.Network/virtualNetworks/<vnet-name-1>'
 ]);
 NTARuleRecommendation
-| where TimeGenerated > ago(30d)
+| where TimeGenerated > ago(lookback)
 | where TargetResourceId in (CoveredVnets)
 | where RuleScope in ('Vnet', 'VirtualNetwork')
 | summarize
@@ -18,4 +21,4 @@ NTARuleRecommendation
     FirstSeen = min(StartTime),
     LastSeen = max(EndTime)
   by TargetResourceId, RecommendedRuleName, RecommendedAction, L4Protocol
-| top 200 by FlowCount desc
+| top topRowLimit by FlowCount desc
