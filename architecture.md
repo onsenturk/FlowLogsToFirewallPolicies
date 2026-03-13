@@ -39,18 +39,22 @@ The repository now also contains a GitHub Copilot-first workflow layer for custo
 
 ## Workshop orchestration flow
 
-1. The user starts the workshop with natural language such as `start` or with the explicit `/01-start-workshop` prompt.
-2. The discovery agent checks Azure sign-in state, confirms the tenant, and asks whether the user wants to provide a specific Log Analytics workspace or discover candidate workspaces in the selected tenant.
-3. The discovery agent validates that Azure CLI and any extension-backed or MCP-backed Azure context are aligned before relying on discovery or query results.
-4. When discovery is needed, the discovery agent identifies candidate subscriptions and Log Analytics workspaces, highlights which workspaces appear to contain relevant VNet flow-log evidence, and asks the customer to choose the workspace to use.
+1. The user starts the workshop with `/00-choose-flow`, natural language such as `start`, or the explicit `/01-start-workshop` prompt.
+2. The discovery agent checks Azure sign-in state and confirms the tenant.
+3. The user chooses one of two startup paths:
+   - **Predefined flow**: the user provides the Log Analytics workspace name or resource ID, tenant ID, subscription ID, and preferred analysis timeframe. The workflow skips workspace discovery and proceeds directly to scope validation.
+   - **Dynamic discovery**: the user provides only the tenant ID and optional hints. The discovery agent enumerates candidate subscriptions and Log Analytics workspaces, highlights which workspaces appear to contain relevant VNet flow-log evidence, and asks the customer to choose the workspace to use.
+4. The discovery agent validates that Azure CLI and any extension-backed or MCP-backed Azure context are aligned before relying on discovery or query results.
 5. After workspace selection, the discovery agent confirms region only if it is still needed, then proposes the candidate VNets observed for the selected workspace, the user confirms the intended VNet scope, and the workflow captures the analysis timeframe.
 6. The discovery flow classifies each confirmed VNet as `VNetFlowLogs`, `NSGFlowLogsFallback`, or `Uncovered` and carries uncovered VNets forward as explicit exclusions.
 7. If a requested hub, transit, or shared-services VNet is `Uncovered`, the workflow treats that as a blocking gap for a full production-scope draft unless the user narrows scope or explicitly accepts a partial review-only output.
-8. The discovery flow analyzes internal traffic, north-south egress, and public inbound exposure for the covered VNets only, keeping the findings explicit per covered VNet or equivalent scope fragment and preserving the evidence source by VNet.
-9. Copilot asks once for confirmation before creating any local request artifacts.
-10. The drafting agent writes review-only outputs under `requests/<datetime>/`.
-11. Generated firewall rule content remains a local infrastructure-as-code draft, stays approval-pending, and is not deployed or applied automatically.
-12. If the customer explicitly asks for remediation guidance after the workshop, the workflow may generate a separate review-only artifact with CLI commands to enable VNet flow logs to the chosen workspace.
+8. The discovery flow exports VNet flow logs from the selected Log Analytics workspace using KQL and analyzes internal traffic, north-south egress, and public inbound exposure for the covered VNets only. Queries run once per covered VNet and start with a `7d` lookback window; if results are sparse for a given VNet the query is re-run with `14d` then `30d` so that no flows are arbitrarily dropped.
+9. Optionally, the workflow produces a Mermaid traffic flow diagram from the discovered flows for human review.
+10. The workflow produces an explicit rule-candidate summary grouped by rule type (network east-west, network platform-internal, application FQDN/service-tag, inbound review items, and unresolved placeholders) before the firewall draft is generated.
+11. Copilot asks once for confirmation before creating any local request artifacts.
+12. The drafting agent writes review-only outputs under `requests/<datetime>/`.
+13. Generated firewall rule content remains a local infrastructure-as-code draft, stays approval-pending, and is not deployed or applied automatically.
+14. If the customer explicitly asks for remediation guidance after the workshop, the workflow may generate a separate review-only artifact with CLI commands to enable VNet flow logs to the chosen workspace.
 
 ## Security model
 

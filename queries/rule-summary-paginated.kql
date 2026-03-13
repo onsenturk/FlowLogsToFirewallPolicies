@@ -1,0 +1,22 @@
+// Per-VNet rule summary with progressive time windows.
+// Run this query once per covered VNet by setting targetVnet to a single resource ID.
+// Start with lookback = 7d. If results are sparse, re-run with 14d then 30d.
+// Using a shorter window first keeps query execution time manageable on large tenants.
+// Replace the placeholders before running the query.
+let lookback = 7d;
+let targetVnet = '/subscriptions/<subscription-id>/resourceGroups/<resource-group>/providers/Microsoft.Network/virtualNetworks/<vnet-name>';
+NTARuleRecommendation
+| where TimeGenerated > ago(lookback)
+| where TargetResourceId =~ targetVnet
+| where RuleScope in ('Vnet', 'VirtualNetwork')
+| summarize
+    FlowCount = sum(TotalFlowCount),
+    PortRanges = make_set(DestPortsRanges, 20),
+    SourcePublicCidrs = make_set(SrcPublicIpCidrs, 20),
+    DestinationPublicCidrs = make_set(DestPublicIpCidrs, 20),
+    SourceServiceTags = make_set(SrcServiceTagsList, 20),
+    DestinationServiceTags = make_set(DestServiceTagsList, 20),
+    FirstSeen = min(StartTime),
+    LastSeen = max(EndTime)
+  by TargetResourceId, RecommendedRuleName, RecommendedAction, L4Protocol
+| order by FlowCount desc

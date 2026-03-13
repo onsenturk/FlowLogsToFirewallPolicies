@@ -1,5 +1,5 @@
 NTANetAnalytics
-| where TimeGenerated > ago(30d)
+| where TimeGenerated > ago(7d)
 | where SubType == 'FlowLog'
 | where FlowType == 'IntraVNet' or isnotempty(ConnectingVnets) or (isnotempty(SrcSubnet) and isnotempty(DestSubnet))
 | summarize

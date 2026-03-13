@@ -17,13 +17,20 @@ The original intent was to use NSG flow logs. That conflicts with the current Az
 - provision an Azure Firewall Policy resource by using Bicep
 - document an approval-first process for turning Traffic Analytics findings into Firewall Policy rules
 - provide KQL queries that surface rule recommendations from Traffic Analytics
-- provide a GitHub Copilot-first workshop workflow that starts by validating Azure sign-in state and tenant, lets the customer provide a specific Log Analytics workspace or discover candidate subscriptions and workspaces across the tenant, identifies which workspaces appear to contain relevant VNet flow-log evidence, asks the customer to choose the workspace to analyze, then proposes candidate VNets, captures the analysis timeframe, validates observed VNet flow-log coverage for the confirmed scope, and creates review-only request artifacts after confirmation
-- require authentication-context reconciliation when Azure CLI and any extension-backed or MCP-backed Azure tooling are both used during workshop discovery
+- provide a paginated KQL query variant for large environments where the default queries exceed workspace query limits
+- provide a GitHub Copilot-first workshop workflow that offers two startup paths:
+  - **predefined flow**: the customer provides the Log Analytics workspace name or resource ID, tenant ID, subscription ID, and analysis timeframe directly and skips workspace discovery
+  - **dynamic discovery**: the customer provides only a tenant ID and optional hints; the workflow enumerates candidate subscriptions and workspaces and asks the customer to choose the workspace before scope confirmation begins
+- require that both paths validate Azure sign-in state, confirm the tenant, and reconcile authentication context before discovery results are trusted
+- allow the workflow to export VNet flow logs from the selected Log Analytics workspace using KQL before rule candidates are summarized
+- include an explicit rule-candidate summary step before the firewall draft is generated, grouping candidates by rule type (network east-west, network platform-internal, application FQDN/service-tag, inbound review items, and unresolved placeholders)
+- include an optional step to produce a Mermaid traffic flow diagram from the discovered flows for human review
 - classify each confirmed VNet as `VNetFlowLogs`, `NSGFlowLogsFallback`, or `Uncovered` when mixed evidence sources exist
 - treat VNet flow logs as the primary evidence source and NSG flow logs as fallback only for VNets without usable VNet evidence
 - treat missing coverage on requested hub, transit, or shared-services VNets as a blocking gap for any full production-scope firewall draft unless the customer explicitly narrows scope or accepts a partial review-only output
 - keep multi-VNet analysis explicit per covered VNet or equivalent scope fragment rather than blending findings across covered VNets
 - keep reusable KQL contracts schema-safe across tenant variations where practical
+- use a progressive time-window approach in all KQL queries: default to `7d` lookback, re-run per VNet with `14d` then `30d` if results are sparse, so that no flows between VNets are arbitrarily dropped by a hard row limit
 - allow an optional post-workshop remediation artifact that contains review-only CLI commands to enable VNet flow logs to a chosen workspace when the customer explicitly asks
 - keep any generated firewall-rule artifact limited to review-only infrastructure-as-code output and never apply or populate live Azure Firewall rules automatically during the workshop
 
