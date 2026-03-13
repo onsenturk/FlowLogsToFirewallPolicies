@@ -1,0 +1,21 @@
+// Replace the sample values before execution.
+let CoveredVnets = dynamic([
+  '/subscriptions/<subscription-id>/resourceGroups/<resource-group>/providers/Microsoft.Network/virtualNetworks/<vnet-name-1>',
+  '/subscriptions/<subscription-id>/resourceGroups/<resource-group>/providers/Microsoft.Network/virtualNetworks/<vnet-name-2>',
+  '/subscriptions/<subscription-id>/resourceGroups/<resource-group>/providers/Microsoft.Network/virtualNetworks/<vnet-name-3>'
+]);
+NTARuleRecommendation
+| where TimeGenerated > ago(30d)
+| where TargetResourceId in (CoveredVnets)
+| where RuleScope in ('Vnet', 'VirtualNetwork')
+| summarize
+    FlowCount = sum(TotalFlowCount),
+    PortRanges = make_set(DestPortsRanges, 20),
+    SourcePublicCidrs = make_set(SrcPublicIpCidrs, 20),
+    DestinationPublicCidrs = make_set(DestPublicIpCidrs, 20),
+    SourceServiceTags = make_set(SrcServiceTagsList, 20),
+    DestinationServiceTags = make_set(DestServiceTagsList, 20),
+    FirstSeen = min(StartTime),
+    LastSeen = max(EndTime)
+  by TargetResourceId, RecommendedRuleName, RecommendedAction, L4Protocol
+| order by FlowCount desc

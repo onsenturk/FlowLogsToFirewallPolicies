@@ -1,0 +1,15 @@
+// Replace the sample values before execution.
+let CoveredVnets = dynamic([
+  '/subscriptions/<subscription-id>/resourceGroups/<resource-group>/providers/Microsoft.Network/virtualNetworks/<vnet-name-1>',
+  '/subscriptions/<subscription-id>/resourceGroups/<resource-group>/providers/Microsoft.Network/virtualNetworks/<vnet-name-2>',
+  '/subscriptions/<subscription-id>/resourceGroups/<resource-group>/providers/Microsoft.Network/virtualNetworks/<vnet-name-3>'
+]);
+let CoveredVnetNames = dynamic(['<vnet-name-1>', '<vnet-name-2>', '<vnet-name-3>']);
+search in (NTATopologyDetails, NTANetAnalytics, NTARuleRecommendation) *
+| where TimeGenerated > ago(30d)
+| where tostring(TargetResourceId) in (CoveredVnets)
+   or tostring(VirtualNetworkResourceId) in (CoveredVnets)
+   or tostring(ConnectingVnets) has_any (CoveredVnetNames)
+   or tostring(Name) has_any (CoveredVnetNames)
+| summarize Records = count(), FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated) by $table
+| order by Records desc

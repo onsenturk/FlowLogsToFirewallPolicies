@@ -1,0 +1,35 @@
+// Run this query inside the selected Log Analytics workspace.
+// Replace the placeholders before execution.
+// This validates observed flow-log coverage in the selected workspace. It does not prove the Azure-side configuration is currently enabled outside the observed data window.
+let lookback = 30d;
+let regionFilter = tolower('<region-or-empty>');
+let confirmedVnetsCsv = '<comma-separated-vnet-name-or-resource-id-fragments>';
+let RequestedVnets =
+    print Raw = split(tolower(confirmedVnetsCsv), ',')
+    | mv-expand RequestedVnet = Raw to typeof(string)
+    | extend RequestedVnet = trim(' ', RequestedVnet)
+    | where isnotempty(RequestedVnet)
+    | project RequestedVnet;
+let Coverage =
+    NTANetAnalytics
+    | where TimeGenerated > ago(lookback)
+    | where SubType == 'FlowLog'
+    | extend Region = tolower(tostring(coalesce(column_ifexists('Region', ''), column_ifexists('TargetResourceLocation', ''), column_ifexists('TargetRegion', ''), column_ifexists('ResourceLocation', ''))))
+    | where isempty(regionFilter) or Region has regionFilter
+    | extend MatchSurface = tolower(strcat(tostring(TargetResourceId), ' ', tostring(ConnectingVnets), ' ', tostring(SrcSubnet), ' ', tostring(DestSubnet)))
+    | extend RequestedVnetList = split(tolower(confirmedVnetsCsv), ',')
+    | mv-expand RequestedVnet = RequestedVnetList to typeof(string)
+    | extend RequestedVnet = trim(' ', RequestedVnet)
+    | where isnotempty(RequestedVnet)
+    | where MatchSurface has RequestedVnet
+    | summarize
+        LastSeen = max(TimeGenerated),
+        Records = count(),
+        SampleTargets = make_set(tostring(TargetResourceId), 5),
+        SampleConnectingVnets = make_set(tostring(ConnectingVnets), 5)
+      by RequestedVnet;
+RequestedVnets
+| join kind=leftouter Coverage on RequestedVnet
+| extend CoverageStatus = iff(isnull(LastSeen), 'ExcludedNoObservedCoverage', 'Covered')
+| project RequestedVnet, CoverageStatus, LastSeen, Records, SampleTargets, SampleConnectingVnets
+| order by CoverageStatus asc, RequestedVnet asc

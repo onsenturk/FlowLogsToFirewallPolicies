@@ -1,0 +1,6 @@
+openapi: 3.0.3
+info:
+  title: FlowLogsToAzFW Infrastructure Repository
+  version: 1.0.0
+  description: Infrastructure-only repository. No runtime application API is exposed.
+paths: {}

@@ -1,0 +1,17 @@
+// Replace the placeholders before running the query.
+let targetResource = '<vnetResourceId>';
+let flowStartTime = datetime(2026-03-01T00:00:00Z);
+let flowEndTime = now();
+NTARuleRecommendation
+| where TargetResourceId =~ targetResource
+| where StartTime >= flowStartTime and EndTime <= flowEndTime
+| where RuleScope == 'Vnet'
+| summarize
+    FlowCount = sum(TotalFlowCount),
+    PortRanges = make_set(DestPortsRanges, 20),
+    SourcePublicCidrs = make_set(SrcPublicIpCidrs, 20),
+    DestinationPublicCidrs = make_set(DestPublicIpCidrs, 20),
+    SourceServiceTags = make_set(SrcServiceTagsList, 20),
+    DestinationServiceTags = make_set(DestServiceTagsList, 20)
+  by RecommendedAction, RecommendedRuleName, L4Protocol, TargetResourceId
+| order by FlowCount desc
