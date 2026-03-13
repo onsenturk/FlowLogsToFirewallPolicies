@@ -8,7 +8,9 @@ Produce a rule candidate summary from the workshop findings before the firewall 
 
 Use [queries/existing-recommended-rules.kql](../../queries/existing-recommended-rules.kql) as the reusable query pattern against the confirmed workspace.
 Replace the `CoveredVnets` placeholder with the confirmed covered VNet resource IDs before execution.
-If the result set is larger than expected, apply a `top 200` limit per covered VNet to keep the output manageable and note the truncation.
+Run the query once per covered VNet rather than across all VNets at once, so that one busy VNet does not obscure recommendations for others.
+Start with the default `7d` lookback. If the result set is sparse for a given VNet, re-run that VNet's query with `14d` then `30d` until the evidence is sufficient.
+If the query still returns few or no results after extending to `30d`, record that VNet as having insufficient evidence and note it as an unresolved gap.
 
 Return a structured summary grouped as:
 
@@ -29,8 +31,8 @@ Return a structured summary grouped as:
 5. **Unresolved or placeholder entries**
    - Any rules that still have unknown CIDRs, FQDNs, or service names that need customer clarification.
 
-6. **Exclusions**
-   - Any covered VNet results that were truncated due to large result sets.
+6. **Exclusions and gaps**
+   - Any covered VNet where evidence was insufficient even after extending to `30d`.
    - Any uncovered VNets that could not contribute rule candidates.
 
 Rules backed only by `NSGFlowLogsFallback` evidence must be labelled as lower-confidence candidates and should not be treated as primary evidence.

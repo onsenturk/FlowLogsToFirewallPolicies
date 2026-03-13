@@ -43,9 +43,9 @@ Optional post-workshop step:
 
 ## Large environment guidance
 
-All KQL queries include a `topRowLimit` or `top N` clause to prevent query timeouts on large tenants. The default limit is `500` rows for traffic analysis queries and `200` rows for rule recommendation queries. Operators can increase these limits if the environment is known to produce more significant flows, but should validate that the workspace query timeout setting supports longer-running queries before doing so.
+All KQL analysis and rule-recommendation queries in this repository default to a `7d` lookback window. On large tenants a shorter initial window keeps query execution time manageable while still capturing recent flows. If results are sparse for a given VNet, re-run that query with `14d` then `30d` until the evidence is sufficient. The workflow uses this progressive time-window approach instead of hard row limits, so no flows between VNets are arbitrarily dropped.
 
-If a query returns exactly the row limit, there may be truncated results. The workflow records this as an explicit exclusion in the traffic summary and output log.
+If a query still returns few or no results after extending to `30d`, the affected VNet is recorded as having insufficient evidence and noted as an unresolved gap in the traffic summary and output log.
 
 ## Guardrails
 

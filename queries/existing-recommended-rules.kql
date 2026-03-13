@@ -5,7 +5,7 @@ let CoveredVnets = dynamic([
   '/subscriptions/<subscription-id>/resourceGroups/<resource-group>/providers/Microsoft.Network/virtualNetworks/<vnet-name-3>'
 ]);
 NTARuleRecommendation
-| where TimeGenerated > ago(30d)
+| where TimeGenerated > ago(7d)
 | where TargetResourceId in (CoveredVnets)
 | where RuleScope in ('Vnet', 'VirtualNetwork')
 | summarize
@@ -18,4 +18,4 @@ NTARuleRecommendation
     FirstSeen = min(StartTime),
     LastSeen = max(EndTime)
   by TargetResourceId, RecommendedRuleName, RecommendedAction, L4Protocol
-| top 200 by FlowCount desc
+| order by FlowCount desc

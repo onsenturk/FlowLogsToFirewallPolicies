@@ -30,7 +30,7 @@ The original intent was to use NSG flow logs. That conflicts with the current Az
 - treat missing coverage on requested hub, transit, or shared-services VNets as a blocking gap for any full production-scope firewall draft unless the customer explicitly narrows scope or accepts a partial review-only output
 - keep multi-VNet analysis explicit per covered VNet or equivalent scope fragment rather than blending findings across covered VNets
 - keep reusable KQL contracts schema-safe across tenant variations where practical
-- apply result-row limits in all KQL queries (`top N`) to prevent timeouts in large environments; document the defaults and how to adjust them
+- use a progressive time-window approach in all KQL queries: default to `7d` lookback, re-run per VNet with `14d` then `30d` if results are sparse, so that no flows between VNets are arbitrarily dropped by a hard row limit
 - allow an optional post-workshop remediation artifact that contains review-only CLI commands to enable VNet flow logs to a chosen workspace when the customer explicitly asks
 - keep any generated firewall-rule artifact limited to review-only infrastructure-as-code output and never apply or populate live Azure Firewall rules automatically during the workshop
 

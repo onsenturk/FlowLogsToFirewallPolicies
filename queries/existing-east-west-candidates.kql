@@ -1,5 +1,5 @@
 NTANetAnalytics
-| where TimeGenerated > ago(30d)
+| where TimeGenerated > ago(7d)
 | where SubType == 'FlowLog'
 | where FlowType == 'IntraVNet' or isnotempty(ConnectingVnets) or (isnotempty(SrcSubnet) and isnotempty(DestSubnet))
 | summarize
@@ -10,4 +10,4 @@ NTANetAnalytics
     BytesReceived = sum(tolong(BytesDestToSrc)),
     SampleRules = make_set(AclRule, 10)
   by TargetResourceId, FlowType, ConnectingVnets, SrcSubnet, DestSubnet, L4Protocol, L7Protocol, DestPort, FlowDirection
-| top 500 by BytesSent desc, BytesReceived desc, Records desc
+| order by BytesSent desc, BytesReceived desc, Records desc

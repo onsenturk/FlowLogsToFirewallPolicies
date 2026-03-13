@@ -1,15 +1,13 @@
-// Paginated rule summary for large environments.
+// Per-VNet rule summary with progressive time windows.
+// Run this query once per covered VNet by setting targetVnet to a single resource ID.
+// Start with lookback = 7d. If results are sparse, re-run with 14d then 30d.
+// Using a shorter window first keeps query execution time manageable on large tenants.
 // Replace the placeholders before running the query.
-// Use topRowLimit to cap results per VNet and prevent query timeouts on large tenants.
-// Increase topRowLimit incrementally if the default is too restrictive for your environment.
-let lookback = 30d;
-let topRowLimit = 200;
-let CoveredVnets = dynamic([
-  '/subscriptions/<subscription-id>/resourceGroups/<resource-group>/providers/Microsoft.Network/virtualNetworks/<vnet-name-1>'
-]);
+let lookback = 7d;
+let targetVnet = '/subscriptions/<subscription-id>/resourceGroups/<resource-group>/providers/Microsoft.Network/virtualNetworks/<vnet-name>';
 NTARuleRecommendation
 | where TimeGenerated > ago(lookback)
-| where TargetResourceId in (CoveredVnets)
+| where TargetResourceId =~ targetVnet
 | where RuleScope in ('Vnet', 'VirtualNetwork')
 | summarize
     FlowCount = sum(TotalFlowCount),
@@ -21,4 +19,4 @@ NTARuleRecommendation
     FirstSeen = min(StartTime),
     LastSeen = max(EndTime)
   by TargetResourceId, RecommendedRuleName, RecommendedAction, L4Protocol
-| top topRowLimit by FlowCount desc
+| order by FlowCount desc

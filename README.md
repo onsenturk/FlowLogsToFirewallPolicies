@@ -31,7 +31,7 @@ New NSG flow logs can no longer be created after June 30, 2025. Because of that 
 - [infra/firewall-policy-rules.sample.bicepparam](infra/firewall-policy-rules.sample.bicepparam) - approved-rule template only, used as the shape for review-only IaC drafts
 - [queries/recommended-rules-by-vnet.kql](queries/recommended-rules-by-vnet.kql) - Traffic Analytics recommendation query
 - [queries/rule-candidates-summary.kql](queries/rule-candidates-summary.kql) - summarized rule candidate query
-- [queries/rule-summary-paginated.kql](queries/rule-summary-paginated.kql) - paginated rule summary query for large environments; adjust `topRowLimit` as needed
+- [queries/rule-summary-paginated.kql](queries/rule-summary-paginated.kql) - per-VNet rule summary query with progressive time windows; run once per covered VNet, start with `7d`, extend to `14d` then `30d` if results are sparse
 - [queries/existing-flow-logs-discovery.kql](queries/existing-flow-logs-discovery.kql) - discovery query for the current tenant setup
 - [queries/existing-recommended-rules.kql](queries/existing-recommended-rules.kql) - rule recommendations for the currently covered VNets
 - [queries/existing-east-west-candidates.kql](queries/existing-east-west-candidates.kql) - east-west candidate flow analysis for the current VNets
@@ -74,7 +74,7 @@ Use the workflow like this:
 9. validate freshness and analyze only the covered VNets, while carrying uncovered VNets forward as explicit exclusions
 10. keep internal, egress, and exposure findings explicit per covered VNet or equivalent scope fragment rather than blending them into a single undifferentiated summary
 11. optionally use `/05a-create-traffic-diagram` to produce a Mermaid traffic flow diagram from the discovered flows
-12. use `/05b-summarize-rules` to produce a structured rule candidate summary before generating the firewall draft; this step also applies result-row limits to prevent issues in large environments
+12. use `/05b-summarize-rules` to produce a structured rule candidate summary before generating the firewall draft; this step runs once per covered VNet with a progressive time window (start at `7d`, extend to `14d` then `30d` if results are sparse)
 13. if a reusable KQL query fails because of schema drift in the selected workspace, rerun it with schema-safe expressions and record that adaptation in the output
 14. ask once before creating any local draft artifacts
 15. write review-only outputs under `requests/<datetime>/`, persisting the confirmed VNet scope, covered VNets, uncovered VNets, and any requested material output log in the request artifacts
@@ -91,14 +91,11 @@ If the workflow encounters a prompt or instruction gap during a workshop run, it
 
 ### Large environment guidance
 
-All KQL queries in this repository include a `top N` clause to prevent query timeouts in large tenants:
+All KQL analysis and rule-recommendation queries in this repository default to a `7d` lookback window. On large tenants, a shorter initial window keeps query execution time manageable while still capturing recent flows. If results are sparse for a given VNet, re-run that query with `14d` then `30d` until the evidence is sufficient. The workflow uses this progressive time-window approach instead of hard row limits, so no flows between VNets are arbitrarily dropped.
 
-- Traffic analysis queries default to `top 500` rows per covered VNet.
-- Rule recommendation queries default to `top 200` rows per covered VNet.
+Queries are also run once per covered VNet (using the `scopeHint` variable or by setting a single VNet in `CoveredVnets`) rather than across all VNets in a single query, so that one busy VNet does not obscure findings for other VNets.
 
-If a query returns exactly the row limit, results may be truncated. The workflow records this as an explicit exclusion in the traffic summary and output log. Operators can increase the limit by editing the `topRowLimit` variable in the relevant query, but should first validate that the workspace query timeout setting supports longer-running queries.
-
-For very large environments, prefer running one query per covered VNet using the `scopeHint` variable rather than running a single region-wide query.
+If a query still returns few or no results after extending to `30d`, the affected VNet is recorded as having insufficient evidence and noted as an unresolved gap in the traffic summary and output log.
 
 Expected workshop outputs:
 

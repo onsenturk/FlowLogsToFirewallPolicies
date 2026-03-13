@@ -1,6 +1,6 @@
 // Replace the sample target resource before execution.
 NTANetAnalytics
-| where TimeGenerated > ago(30d)
+| where TimeGenerated > ago(7d)
 | where SubType == 'FlowLog'
 | where TargetResourceId == '<subscription-id>/<resource-group>/<vnet-name>'
 | where FlowDirection == 'Inbound'
@@ -12,4 +12,4 @@ NTANetAnalytics
     SampleSourceIps = make_set(SrcPublicIps, 3),
     SampleSourceTags = make_set(SrcServiceTags, 3)
   by FlowType, DestSubnet, DestPort, L4Protocol, L7Protocol, AclRule
-| top 500 by BytesIn desc, Records desc
+| order by BytesIn desc, Records desc

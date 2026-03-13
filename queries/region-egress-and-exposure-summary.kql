@@ -1,9 +1,8 @@
 // Run this query inside the selected Log Analytics workspace.
 // Replace the placeholders before execution.
-// Set lookback to the confirmed analysis timeframe, such as 7d, 14d, 30d, 60d, 90d, or a custom value like 21d.
-// topRowLimit caps the result set to prevent timeouts in large environments. Increase if needed.
-let lookback = 30d;
-let topRowLimit = 500;
+// Start with lookback = 7d. If results are sparse or the environment is quiet, extend to 14d then 30d.
+// Running with a shorter window first keeps query execution time manageable on large tenants.
+let lookback = 7d;
 let regionFilter = tolower('<region-or-empty>');
 let scopeHint = '<optional-vnet-name-or-resource-id-fragment>';
 let Egress =
@@ -59,4 +58,3 @@ let Exposure =
       by ResultType = 'Exposure', Region, TargetResourceId, DestSubnet, ExposureClass;
 union Egress, Exposure
 | order by ResultType asc, Records desc
-| take topRowLimit
