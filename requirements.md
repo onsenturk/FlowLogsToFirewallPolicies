@@ -17,7 +17,7 @@ The original intent was to use NSG flow logs. That conflicts with the current Az
 - provision an Azure Firewall Policy resource by using Bicep
 - document an approval-first process for turning Traffic Analytics findings into Firewall Policy rules
 - provide KQL queries that surface rule recommendations from Traffic Analytics
-- provide a GitHub Copilot-first workshop workflow that discovers candidate subscriptions and workspaces across a tenant, recommends which workspace to use for a target region, proposes candidate VNets, captures the analysis timeframe, validates observed VNet flow-log coverage for the confirmed scope, and creates review-only request artifacts after confirmation
+- provide a GitHub Copilot-first workshop workflow that starts by validating Azure sign-in state and tenant, lets the customer provide a specific Log Analytics workspace or discover candidate subscriptions and workspaces across the tenant, identifies which workspaces appear to contain relevant VNet flow-log evidence, asks the customer to choose the workspace to analyze, then proposes candidate VNets, captures the analysis timeframe, validates observed VNet flow-log coverage for the confirmed scope, and creates review-only request artifacts after confirmation
 - require authentication-context reconciliation when Azure CLI and any extension-backed or MCP-backed Azure tooling are both used during workshop discovery
 - classify each confirmed VNet as `VNetFlowLogs`, `NSGFlowLogsFallback`, or `Uncovered` when mixed evidence sources exist
 - treat VNet flow logs as the primary evidence source and NSG flow logs as fallback only for VNets without usable VNet evidence

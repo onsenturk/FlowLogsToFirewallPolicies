@@ -39,17 +39,18 @@ The repository now also contains a GitHub Copilot-first workflow layer for custo
 
 ## Workshop orchestration flow
 
-1. The user starts the workshop with a tenant and target region.
-2. The discovery agent validates that Azure CLI and any extension-backed or MCP-backed Azure context are aligned before relying on discovery or query results.
-3. The discovery agent identifies candidate subscriptions and Log Analytics workspaces, then recommends which workspace to use based on flow-log evidence, freshness, and coverage.
-4. The discovery agent proposes the candidate VNets observed for the requested region, the user confirms the intended VNet scope, and the workflow captures the analysis timeframe.
-5. The discovery flow classifies each confirmed VNet as `VNetFlowLogs`, `NSGFlowLogsFallback`, or `Uncovered` and carries uncovered VNets forward as explicit exclusions.
-6. If a requested hub, transit, or shared-services VNet is `Uncovered`, the workflow treats that as a blocking gap for a full production-scope draft unless the user narrows scope or explicitly accepts a partial review-only output.
-7. The discovery flow analyzes internal traffic, north-south egress, and public inbound exposure for the covered VNets only, keeping the findings explicit per covered VNet or equivalent scope fragment and preserving the evidence source by VNet.
-8. Copilot asks once for confirmation before creating any local request artifacts.
-9. The drafting agent writes review-only outputs under `requests/<datetime>/`.
-10. Generated firewall rule content remains approval-pending and is not deployed automatically.
-11. If the customer explicitly asks for remediation guidance after the workshop, the workflow may generate a separate review-only artifact with CLI commands to enable VNet flow logs to the chosen workspace.
+1. The user starts the workshop with natural language such as `start` or with the explicit `/01-start-workshop` prompt.
+2. The discovery agent checks Azure sign-in state, confirms the tenant, and asks whether the user wants to provide a specific Log Analytics workspace or discover candidate workspaces in the selected tenant.
+3. The discovery agent validates that Azure CLI and any extension-backed or MCP-backed Azure context are aligned before relying on discovery or query results.
+4. When discovery is needed, the discovery agent identifies candidate subscriptions and Log Analytics workspaces, highlights which workspaces appear to contain relevant VNet flow-log evidence, and asks the customer to choose the workspace to use.
+5. After workspace selection, the discovery agent confirms region only if it is still needed, then proposes the candidate VNets observed for the selected workspace, the user confirms the intended VNet scope, and the workflow captures the analysis timeframe.
+6. The discovery flow classifies each confirmed VNet as `VNetFlowLogs`, `NSGFlowLogsFallback`, or `Uncovered` and carries uncovered VNets forward as explicit exclusions.
+7. If a requested hub, transit, or shared-services VNet is `Uncovered`, the workflow treats that as a blocking gap for a full production-scope draft unless the user narrows scope or explicitly accepts a partial review-only output.
+8. The discovery flow analyzes internal traffic, north-south egress, and public inbound exposure for the covered VNets only, keeping the findings explicit per covered VNet or equivalent scope fragment and preserving the evidence source by VNet.
+9. Copilot asks once for confirmation before creating any local request artifacts.
+10. The drafting agent writes review-only outputs under `requests/<datetime>/`.
+11. Generated firewall rule content remains approval-pending and is not deployed automatically.
+12. If the customer explicitly asks for remediation guidance after the workshop, the workflow may generate a separate review-only artifact with CLI commands to enable VNet flow logs to the chosen workspace.
 
 ## Security model
 

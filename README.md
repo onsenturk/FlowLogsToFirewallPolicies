@@ -60,16 +60,18 @@ This repository now includes a GitHub Copilot-first customer workshop workflow.
 
 Use the workflow like this:
 
-1. start with tenant and target region
-2. verify that Azure CLI and any extension-backed or MCP-backed Azure tooling are aligned to the same tenant and subscription before trusting discovery results
-3. let the discovery flow enumerate candidate subscriptions, recommend which Log Analytics workspace to use, and propose the candidate VNets observed for that region
-4. confirm the intended VNet scope and analysis timeframe, then validate the evidence source for each confirmed VNet as `VNetFlowLogs`, `NSGFlowLogsFallback`, or `Uncovered`
-5. if an uncovered VNet is a hub, transit, or shared-services VNet in the requested production scope, stop the full-scope draft unless the customer narrows scope or explicitly accepts a partial review-only output
-6. validate freshness and analyze only the covered VNets, while carrying uncovered VNets forward as explicit exclusions
-7. keep internal, egress, and exposure findings explicit per covered VNet or equivalent scope fragment rather than blending them into a single undifferentiated summary
-8. if a reusable KQL query fails because of schema drift in the selected workspace, rerun it with schema-safe expressions and record that adaptation in the output
-9. ask once before creating any local draft artifacts
-10. write review-only outputs under `requests/<datetime>/`, persisting the confirmed VNet scope, covered VNets, uncovered VNets, and any requested material output log in the request artifacts
+1. start with natural language such as `start` or with `/01-start-workshop`
+2. confirm Azure sign-in state and tenant before discovery begins
+3. choose whether to provide a specific Log Analytics workspace or let the workflow discover candidate workspaces in the selected tenant
+4. verify that Azure CLI and any extension-backed or MCP-backed Azure tooling are aligned to the same tenant and subscription before trusting discovery results
+5. let the discovery flow enumerate candidate subscriptions, identify which candidate workspaces appear to contain relevant VNet flow-log evidence, and ask the customer to choose the workspace to analyze
+6. confirm region only if it is still needed, then confirm the intended VNet scope and analysis timeframe, and validate the evidence source for each confirmed VNet as `VNetFlowLogs`, `NSGFlowLogsFallback`, or `Uncovered`
+7. if an uncovered VNet is a hub, transit, or shared-services VNet in the requested production scope, stop the full-scope draft unless the customer narrows scope or explicitly accepts a partial review-only output
+8. validate freshness and analyze only the covered VNets, while carrying uncovered VNets forward as explicit exclusions
+9. keep internal, egress, and exposure findings explicit per covered VNet or equivalent scope fragment rather than blending them into a single undifferentiated summary
+10. if a reusable KQL query fails because of schema drift in the selected workspace, rerun it with schema-safe expressions and record that adaptation in the output
+11. ask once before creating any local draft artifacts
+12. write review-only outputs under `requests/<datetime>/`, persisting the confirmed VNet scope, covered VNets, uncovered VNets, and any requested material output log in the request artifacts
 
 Optional post-workshop step:
 

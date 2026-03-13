@@ -2,6 +2,12 @@
 
 Use these prompts in order for customer workshops that analyze existing Azure flow logs and generate review-only Azure Firewall drafts.
 
+## Quick Start
+
+- Start the workflow with natural language such as `start` or `start the Azure Firewall workshop`, or use `/01-start-workshop` when you want the explicit prompt entry point.
+- The startup flow first checks Azure sign-in state, confirms the tenant, and asks whether the customer wants to provide a specific Log Analytics workspace or discover candidate workspaces.
+- Workspace discovery then identifies which candidate workspaces appear to contain relevant VNet flow-log evidence and asks the customer to choose one before scope confirmation begins.
+
 ## Execution order
 
 1. `/01-start-workshop`
@@ -25,9 +31,10 @@ Optional post-workshop step:
 - Discovery is read-only and tenant-scoped by default.
 - Use managed identity with Azure CLI in customer environments.
 - If Azure CLI and any extension-backed or MCP-backed Azure tooling are both used, validate that they point to the same tenant and subscription before trusting discovery or query results.
+- Startup should check Azure sign-in state first, confirm the tenant next, and treat region as a later detail unless it is needed to disambiguate candidate workspaces or downstream analysis.
 - Prefer virtual network flow logs over NSG flow logs when both are present.
 - If different VNets are backed by different log sources, classify each confirmed VNet as `VNetFlowLogs`, `NSGFlowLogsFallback`, or `Uncovered` and preserve that classification through the workflow.
-- Discovery must propose the candidate VNets, confirm the intended VNet scope, and capture the analysis timeframe before traffic analysis starts.
+- Discovery must identify which candidate workspaces appear to contain the relevant VNet flow-log evidence, ask the customer to choose the workspace to analyze, then propose the candidate VNets, confirm the intended VNet scope, and capture the analysis timeframe before traffic analysis starts.
 - If any confirmed VNet lacks observed usable coverage in the selected workspace, continue only for covered VNets and list the uncovered VNets as explicit exclusions.
 - If an uncovered VNet is a hub, transit, or shared-services VNet in the requested production scope, treat that as a blocking gap for a full-scope draft unless the customer narrows scope or accepts a partial review-only output.
 - If a reusable query fails due to workspace schema drift, rerun it with schema-safe expressions and record the adaptation in the summary.
@@ -39,8 +46,8 @@ Optional post-workshop step:
 
 ## Discovery handoff
 
-- `/02-discover-workspaces` should end by asking the exact follow-up question needed to confirm the VNet scope and timeframe.
-- `/03-confirm-workspace-and-scope` is the hard handoff gate and should return the confirmed timeframe, evidence source by VNet, covered VNets, excluded VNets, and any remaining gaps before prompts 04 and 05 are used.
+- `/02-discover-workspaces` should end by asking the exact follow-up question that makes the customer choose the workspace for the rest of the analysis.
+- `/03-confirm-workspace-and-scope` is the hard handoff gate after workspace selection and should return the confirmed timeframe, evidence source by VNet, covered VNets, excluded VNets, and any remaining gaps before prompts 04 and 05 are used.
 - `/04-analyze-internal-traffic` and `/05-analyze-egress-and-exposure` should keep `scopeHint` explicit by running once per covered VNet or equivalent resource scope fragment when more than one covered VNet remains, and the returned analysis should stay segmented by that explicit scope.
 - Request artifacts should persist the confirmed VNet scope, evidence source by VNet, covered VNets, and uncovered VNets rather than relying on chat context only.
 - If output capture is requested, the drafting flow should also create `output-log-<region>.md` with substantive workflow outputs only, not the raw user prompts.

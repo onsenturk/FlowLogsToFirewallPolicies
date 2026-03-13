@@ -1,12 +1,12 @@
 ---
 name: "03 Confirm Workspace And Scope"
 description: "Confirm the chosen Log Analytics workspace, freshness, and region-scoped analysis boundary before traffic analysis begins."
-argument-hint: "Provide the recommended workspace, region, proposed VNets, and any preferred timeframe."
+argument-hint: "Provide the selected workspace, any known region, the proposed VNets, and any preferred timeframe."
 agent: "Discovery"
 ---
 Confirm the selected workspace and traffic-analysis scope.
 
-First confirm which of the proposed VNets the customer actually wants in scope and confirm the analysis timeframe.
+First confirm the selected workspace. If region is still ambiguous or still needed for downstream analysis and artifact naming, confirm or infer it at this stage. Then confirm which of the proposed VNets the customer actually wants in scope and confirm the analysis timeframe.
 Then use [queries/verify-vnet-evidence-source.kql](../../queries/verify-vnet-evidence-source.kql) to classify the evidence source for each confirmed VNet.
 If the customer provides a custom timeframe, normalize it to a valid KQL duration such as `21d` or `12h` before continuing.
 If Azure CLI and any extension-backed or MCP-backed Azure tooling are both in use, explicitly confirm that they are aligned to the same tenant and subscription before trusting the results.
