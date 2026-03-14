@@ -26,25 +26,34 @@ Use this workflow when the customer environment already has flow logs and you wa
 
 ### Prerequisites
 
+Complete [prerequisites.md](prerequisites.md) before starting the workshop.
+
+Required setup for the workshop:
+
 - Azure CLI access in the customer environment
-- managed identity available for `az login --identity`
+- Log Analytics query capability through `az monitor log-analytics query`
+- a least-privilege read-only user or managed identity
 - read access to the target tenant, its candidate subscriptions, and candidate Log Analytics workspaces
 - permission to run Log Analytics queries
 - if extension-backed or MCP-backed Azure tooling is used alongside Azure CLI, permission and visibility must exist in the same tenant and subscription context
+- a full Azure logout and login reset before the workshop begins
 
 ### Recommended workshop sequence
 
-1. Start with the prompts in [.github/prompts](.github/prompts).
-2. Use tenant and region as the initial scope.
-3. Reconcile Azure CLI context with any extension-backed or MCP-backed Azure tooling before trusting discovery or query results.
-4. Let the discovery flow enumerate candidate subscriptions, recommend the best workspace based on coverage and freshness, and propose the candidate VNets observed for that region.
-5. Confirm the intended VNet scope and analysis timeframe.
-6. Validate the evidence source for each confirmed VNet, classifying it as `VNetFlowLogs`, `NSGFlowLogsFallback`, or `Uncovered`, then narrow the analysis scope to the covered VNets if any are missing.
-7. If a requested hub, transit, or shared-services VNet is uncovered, stop the full production-scope draft unless the customer narrows scope or explicitly accepts a partial review-only output.
-8. Keep Azure activity read-only during discovery.
-9. Ask once before creating local request artifacts.
-10. Write review-only outputs under `requests/<datetime>/`.
-11. If the customer asks to capture substantive workflow results in the request folder, create `output-log-<region>.md` alongside the other approved artifacts.
+1. Complete the logout and re-login reset from [prerequisites.md](prerequisites.md) and verify the intended read-only Azure identity.
+2. Start with the prompts in [.github/prompts](.github/prompts).
+3. Use tenant and region as the initial scope.
+4. Reconcile Azure CLI context with any extension-backed or MCP-backed Azure tooling before trusting discovery or query results.
+5. Let the discovery flow enumerate candidate subscriptions and recommend the best workspace based on coverage and freshness.
+6. Run the lightweight discovery and coverage pass with a default `7d` lookback unless the customer explicitly overrides it.
+7. Choose either `dynamic discovery` or `predefined VNet scope`.
+8. Confirm the intended VNet scope and detailed analysis timeframe.
+9. Validate the evidence source for each confirmed VNet, classifying it as `VNetFlowLogs`, `NSGFlowLogsFallback`, or `Uncovered`, then narrow the analysis scope to the covered VNets if any are missing.
+10. If a requested hub, transit, or shared-services VNet is uncovered, stop the full production-scope draft unless the customer narrows scope or explicitly accepts a partial review-only output.
+11. Keep Azure activity read-only during discovery.
+12. Ask once before creating local request artifacts.
+13. Write review-only outputs under `requests/<datetime>/`.
+14. If the customer asks to capture substantive workflow results in the request folder, create `output-log-<region>.md` alongside the other approved artifacts.
 
 The workshop supports standard timeframe choices such as `7d`, `14d`, `30d`, `60d`, and `90d`, plus custom KQL-compatible duration values when needed.
 
@@ -52,7 +61,32 @@ If some confirmed VNets do not show usable observed coverage in the selected wor
 
 If some covered VNets are backed only by NSG flow logs, the workflow should preserve that lower-confidence fallback status explicitly in the outputs instead of blending it with VNet-backed evidence.
 
+If the customer wants a traffic-flow diagram, the diagram may summarize all confirmed covered VNets, but the downstream rule evidence and exclusions must remain explicit per VNet.
+
 If the selected workspace schema differs from the reusable KQL templates, adapt the queries with schema-safe expressions such as `column_ifexists(...)` and record that adaptation in the review output.
+
+### Query selection guidance
+
+Use the queries by category so large workspaces stay on the per-VNet path once coverage is confirmed.
+
+Discovery and coverage:
+
+- [queries/workspace-flow-log-coverage.kql](queries/workspace-flow-log-coverage.kql)
+- [queries/workspace-flow-log-freshness.kql](queries/workspace-flow-log-freshness.kql)
+- [queries/verify-vnet-flow-log-coverage.kql](queries/verify-vnet-flow-log-coverage.kql)
+- [queries/verify-vnet-evidence-source.kql](queries/verify-vnet-evidence-source.kql)
+
+Per-VNet internal, egress, exposure, and rule analysis:
+
+- [queries/region-internal-traffic-summary.kql](queries/region-internal-traffic-summary.kql) run once per covered VNet or scope fragment
+- [queries/region-egress-and-exposure-summary.kql](queries/region-egress-and-exposure-summary.kql) run once per covered VNet or scope fragment
+- [queries/recommended-rules-by-vnet.kql](queries/recommended-rules-by-vnet.kql)
+- [queries/rule-candidates-summary.kql](queries/rule-candidates-summary.kql) only after the scope is narrowed
+
+Optional diagram or high-level reviewer summaries:
+
+- [queries/region-internal-traffic-summary.kql](queries/region-internal-traffic-summary.kql) when intentionally aggregated for a traffic-flow diagram
+- [queries/region-egress-and-exposure-summary.kql](queries/region-egress-and-exposure-summary.kql) when intentionally aggregated for a traffic-flow diagram
 
 ### Expected local outputs
 

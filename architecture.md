@@ -43,14 +43,17 @@ The repository now also contains a GitHub Copilot-first workflow layer for custo
 2. The discovery agent checks Azure sign-in state, confirms the tenant, and asks whether the user wants to provide a specific Log Analytics workspace or discover candidate workspaces in the selected tenant.
 3. The discovery agent validates that Azure CLI and any extension-backed or MCP-backed Azure context are aligned before relying on discovery or query results.
 4. When discovery is needed, the discovery agent identifies candidate subscriptions and Log Analytics workspaces, highlights which workspaces appear to contain relevant VNet flow-log evidence, and asks the customer to choose the workspace to use.
-5. After workspace selection, the discovery agent confirms region only if it is still needed, then proposes the candidate VNets observed for the selected workspace, the user confirms the intended VNet scope, and the workflow captures the analysis timeframe.
-6. The discovery flow classifies each confirmed VNet as `VNetFlowLogs`, `NSGFlowLogsFallback`, or `Uncovered` and carries uncovered VNets forward as explicit exclusions.
-7. If a requested hub, transit, or shared-services VNet is `Uncovered`, the workflow treats that as a blocking gap for a full production-scope draft unless the user narrows scope or explicitly accepts a partial review-only output.
-8. The discovery flow analyzes internal traffic, north-south egress, and public inbound exposure for the covered VNets only, keeping the findings explicit per covered VNet or equivalent scope fragment and preserving the evidence source by VNet.
-9. Copilot asks once for confirmation before creating any local request artifacts.
-10. The drafting agent writes review-only outputs under `requests/<datetime>/`.
-11. Generated firewall rule content remains a local infrastructure-as-code draft, stays approval-pending, and is not deployed or applied automatically.
-12. If the customer explicitly asks for remediation guidance after the workshop, the workflow may generate a separate review-only artifact with CLI commands to enable VNet flow logs to the chosen workspace.
+5. After workspace selection, the discovery agent confirms region only if it is still needed, runs a lightweight discovery and coverage pass with a default `7d` lookback unless the customer explicitly overrides it, then asks the customer to choose either `dynamic discovery` or `predefined VNet scope`.
+6. In `dynamic discovery`, the discovery flow proposes the candidate VNets observed for the selected workspace. In `predefined VNet scope`, the customer supplies the VNet list up front and the workflow validates only that scope.
+7. The user confirms the intended VNet scope and the workflow captures the detailed analysis timeframe.
+8. The discovery flow classifies each confirmed VNet as `VNetFlowLogs`, `NSGFlowLogsFallback`, or `Uncovered` and carries uncovered VNets forward as explicit exclusions.
+9. If a requested hub, transit, or shared-services VNet is `Uncovered`, the workflow treats that as a blocking gap for a full production-scope draft unless the user narrows scope or explicitly accepts a partial review-only output.
+10. The discovery flow analyzes internal traffic, north-south egress, and public inbound exposure for the covered VNets only, keeping the findings explicit per covered VNet or equivalent scope fragment and preserving the evidence source by VNet.
+11. An optional traffic-flow diagram may summarize all confirmed covered VNets, but it does not replace the per-VNet evidence contract for firewall-rule generation.
+12. Copilot asks once for confirmation before creating any local request artifacts.
+13. The drafting agent writes review-only outputs under `requests/<datetime>/`.
+14. Generated firewall rule content remains a local infrastructure-as-code draft, stays approval-pending, and is synthesized from the per-VNet evidence rather than a single blended workspace-wide summary.
+15. If the customer explicitly asks for remediation guidance after the workshop, the workflow may generate a separate review-only artifact with CLI commands to enable VNet flow logs to the chosen workspace.
 
 ## Security model
 

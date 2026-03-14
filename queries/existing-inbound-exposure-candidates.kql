@@ -1,3 +1,5 @@
+// Query role: per-VNet analysis.
+// Use this environment-specific query for inbound exposure review after scope is confirmed.
 // Replace the sample target resource before execution.
 NTANetAnalytics
 | where TimeGenerated > ago(30d)

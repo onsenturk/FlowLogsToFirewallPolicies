@@ -1,4 +1,5 @@
-// Run this query inside the selected Log Analytics workspace.
+// Query role: per-VNet analysis by default; optional all-VNet diagram input when intentionally aggregated.
+// Use this query inside the selected Log Analytics workspace.
 // Replace the placeholders before execution.
 // Set lookback to the confirmed analysis timeframe, such as 7d, 14d, 30d, 60d, 90d, or a custom value like 21d.
 let lookback = 30d;

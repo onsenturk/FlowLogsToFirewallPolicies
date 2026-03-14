@@ -1,3 +1,5 @@
+// Query role: per-VNet analysis.
+// Use this query for detailed rule recommendations after the covered VNet scope is confirmed.
 // Replace the placeholders before running the query.
 let targetResource = '<vnetResourceId>';
 let flowStartTime = datetime(2026-03-01T00:00:00Z);

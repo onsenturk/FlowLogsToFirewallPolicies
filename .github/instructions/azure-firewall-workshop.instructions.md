@@ -11,7 +11,7 @@ name: "Azure Firewall Workshop Guardrails"
 - Start from Azure sign-in state and tenant. Discover candidate subscriptions and Log Analytics workspaces first, then recommend which workspace to use based on flow-log evidence, freshness, and coverage. Confirm region later only when it is needed to disambiguate workspaces, interpret evidence, or name artifacts.
 - Prefer virtual network flow logs over NSG flow logs when both exist.
 - When different VNets are backed by different log sources, treat virtual network flow logs as the primary source and NSG flow logs as fallback only for the VNets that lack usable VNet evidence.
-- Before traffic analysis begins, identify which candidate workspaces appear to contain the relevant VNet flow-log evidence, have the customer choose the workspace to analyze, propose the candidate VNets observed in that workspace, confirm the intended VNet scope, ask for the analysis timeframe, and validate the evidence source for each confirmed VNet as `VNetFlowLogs`, `NSGFlowLogsFallback`, or `Uncovered`.
+- Before traffic analysis begins, identify which candidate workspaces appear to contain the relevant VNet flow-log evidence, have the customer choose the workspace to analyze, run a lightweight discovery and coverage pass with a default `7d` lookback unless the customer explicitly overrides it, ask the customer to choose either `dynamic discovery` or `predefined VNet scope`, confirm the intended VNet scope, ask for the detailed analysis timeframe, and validate the evidence source for each confirmed VNet as `VNetFlowLogs`, `NSGFlowLogsFallback`, or `Uncovered`.
 - If any confirmed VNet lacks observed usable coverage in the selected workspace, continue only for VNets classified as `VNetFlowLogs` or `NSGFlowLogsFallback` and list `Uncovered` VNets as explicit exclusions and unresolved gaps.
 - If the requested production scope includes a hub, transit, shared-services, or otherwise central VNet and that VNet lacks observed coverage, do not generate a full-scope firewall draft unless the customer explicitly narrows the scope or accepts a partial review-only draft.
 - If a reusable KQL contract fails because a workspace schema differs from the template, adapt the query with schema-safe expressions such as `column_ifexists(...)`, record that adaptation as an assumption or workflow gap, and avoid presenting the failed template as authoritative.
@@ -31,11 +31,12 @@ name: "Azure Firewall Workshop Guardrails"
 2. Determine whether the customer wants to provide a specific Log Analytics workspace or discover candidate workspaces.
 3. Discover candidate subscriptions and Log Analytics workspaces for the selected tenant when discovery is needed.
 4. Recommend a primary workspace, record any secondary candidates, identify which workspaces appear to contain relevant VNet flow-log evidence, and have the customer choose the workspace to analyze.
-5. Confirm region only if it is still needed, then confirm the intended VNet scope, capture the analysis timeframe, and validate the evidence source for each confirmed VNet.
+5. Confirm region only if it is still needed, run the lightweight discovery and coverage pass, confirm the chosen scope mode, then confirm the intended VNet scope, capture the analysis timeframe, and validate the evidence source for each confirmed VNet.
 6. Validate freshness before analyzing traffic.
 7. Analyze internal traffic, egress, and inbound exposure for the covered VNets only, keeping the evidence explicit per covered VNet or equivalent resource scope fragment and preserving whether that evidence came from `VNetFlowLogs` or `NSGFlowLogsFallback`.
-8. Ask once for confirmation before creating local request outputs.
-9. Write review-only artifacts under `requests/<datetime>/`, and persist the confirmed VNet scope, per-VNet evidence source, covered VNets, uncovered VNets, and material workflow outputs in the request artifacts.
+8. Treat any all-covered-VNet traffic diagram as a separate optional artifact and do not let it replace the per-VNet evidence contract for rules.
+9. Ask once for confirmation before creating local request outputs.
+10. Write review-only artifacts under `requests/<datetime>/`, and persist the confirmed VNet scope, per-VNet evidence source, covered VNets, uncovered VNets, and material workflow outputs in the request artifacts.
 
 ## Output Contract
 

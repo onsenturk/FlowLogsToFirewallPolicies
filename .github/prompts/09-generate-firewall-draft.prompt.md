@@ -6,6 +6,8 @@ agent: "Drafting"
 ---
 Create the review-only Azure Firewall infrastructure-as-code draft artifact in the confirmed request folder.
 
+Synthesize the draft from the per-VNet internal, egress, and exposure summaries. Deduplicate shared dependencies only after preserving the per-VNet evidence and exclusion record.
+
 Requirements:
 
 1. File name: `firewall-rules-draft-<region>.bicepparam`
@@ -19,3 +21,4 @@ Requirements:
 9. Do not place unresolved service names or pseudo-FQDN labels into address fields unless they are valid Azure Firewall constructs.
 10. If CIDRs, service tags, or FQDNs are still unresolved, keep explicit placeholders and call them out in comments instead of implying deployment readiness.
 11. If any VNet is backed only by `NSGFlowLogsFallback`, carry that lower-confidence evidence status into comments and avoid broad rules derived only from legacy fallback evidence.
+12. If a shared dependency is aggregated across multiple VNets, preserve enough context in comments or nearby review text so reviewers can still trace which VNets contributed that rule candidate.

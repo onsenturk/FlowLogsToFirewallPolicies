@@ -1,3 +1,5 @@
+// Query role: per-VNet analysis.
+// Use this query after the covered VNet scope is narrowed. Do not use it as a broad workspace-wide discovery query.
 // Replace the placeholders before running the query.
 let targetResource = '<vnetResourceId>';
 let flowStartTime = datetime(2026-03-01T00:00:00Z);

@@ -1,4 +1,6 @@
-// Run this query inside the selected Log Analytics workspace.
+// Query role: discovery and coverage.
+// Use this query inside the selected Log Analytics workspace.
+// Purpose: classify each confirmed VNet as VNetFlowLogs, NSGFlowLogsFallback, or Uncovered.
 // Replace the placeholders before execution.
 // This classifies each confirmed VNet as VNetFlowLogs, NSGFlowLogsFallback, or Uncovered based on observed workspace evidence.
 let lookback = 30d;

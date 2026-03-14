@@ -1,4 +1,6 @@
-// Run this query inside the selected Log Analytics workspace.
+// Query role: discovery and coverage.
+// Use this query inside the selected Log Analytics workspace.
+// Purpose: validate observed coverage for the confirmed VNet scope before detailed analysis begins.
 // Replace the placeholders before execution.
 // This validates observed flow-log coverage in the selected workspace. It does not prove the Azure-side configuration is currently enabled outside the observed data window.
 let lookback = 30d;

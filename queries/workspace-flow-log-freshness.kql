@@ -1,4 +1,6 @@
-// Run this query inside one candidate Log Analytics workspace at a time.
+// Query role: discovery and coverage.
+// Use this query inside one candidate Log Analytics workspace at a time.
+// Purpose: validate freshness before trusting the workspace for downstream analysis.
 // Replace the placeholders before execution.
 let lookback = 7d;
 let regionFilter = tolower('<region-or-empty>');

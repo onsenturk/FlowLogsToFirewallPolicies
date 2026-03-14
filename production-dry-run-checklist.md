@@ -28,12 +28,13 @@ If any item marked `Fail` is also listed as a stop condition, do not trust the g
 
 ## 1. Authentication And Context
 
-1. Azure CLI identity is the intended production read-only identity.
-2. Azure CLI tenant matches the intended customer tenant.
-3. Azure CLI subscription context is either the intended subscription or intentionally tenant-scoped for discovery.
-4. If extension-backed or MCP-backed Azure tooling was used, its tenant matches Azure CLI.
-5. If extension-backed or MCP-backed Azure tooling was used, its subscription visibility matches Azure CLI for the relevant discovery and query steps.
-6. Any context mismatch was treated as a blocking issue and resolved before workspace selection.
+1. The operator completed the full Azure logout and login reset before the workshop began.
+2. Azure CLI identity is the intended production read-only identity.
+3. Azure CLI tenant matches the intended customer tenant.
+4. Azure CLI subscription context is either the intended subscription or intentionally tenant-scoped for discovery.
+5. If extension-backed or MCP-backed Azure tooling was used, its tenant matches Azure CLI.
+6. If extension-backed or MCP-backed Azure tooling was used, its subscription visibility matches Azure CLI for the relevant discovery and query steps.
+7. Any context mismatch was treated as a blocking issue and resolved before workspace selection.
 
 Stop condition:
 Do not trust the draft if discovery or Log Analytics queries were executed with mixed or unresolved Azure contexts.

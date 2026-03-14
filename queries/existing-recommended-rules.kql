@@ -1,3 +1,5 @@
+// Query role: per-VNet analysis.
+// Use this environment-specific query for rule recommendations across a confirmed covered VNet set.
 // Replace the sample values before execution.
 let CoveredVnets = dynamic([
   '/subscriptions/<subscription-id>/resourceGroups/<resource-group>/providers/Microsoft.Network/virtualNetworks/<vnet-name-1>',
