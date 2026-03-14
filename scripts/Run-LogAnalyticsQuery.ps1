@@ -24,9 +24,10 @@ if (-not (Test-Path -LiteralPath $QueryFile -PathType Leaf)) {
 $queryText = Get-Content -LiteralPath $QueryFile -Raw
 
 foreach ($replacement in $Replace) {
-    $parts = $replacement -split '=', 2
+    $separator = if ($replacement.Contains('=>')) { '=>' } else { '=' }
+    $parts = $replacement -split [regex]::Escape($separator), 2
     if ($parts.Count -ne 2) {
-        throw "Invalid replacement '$replacement'. Use <token>=<value>."
+        throw "Invalid replacement '$replacement'. Use <token>=<value> or <token>=> <value>."
     }
 
     $queryText = $queryText.Replace($parts[0], $parts[1])

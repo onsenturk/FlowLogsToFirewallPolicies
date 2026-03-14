@@ -97,5 +97,6 @@ Use the KQL files by role so large workspaces stay on the per-VNet path after co
 - `validation-questions-<region>.md`
 - `firewall-rules-draft-<region>.bicepparam`
 - `firewall-rules-draft-<region>.bicepparam` - review-only IaC draft only
+- `query-results/subnet-cidrs.json`
 - Optional: `remediation-commands-<region>.md`
 - Optional: `discovery-summary-<region>.md`

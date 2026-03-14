@@ -55,6 +55,7 @@ Required setup for the workshop:
 13. Write review-only outputs under `requests/<datetime>/`.
 14. If the customer asks to capture substantive workflow results in the request folder, create `output-log-<region>.md` alongside the other approved artifacts.
 15. If the customer asks for an optional all-covered-VNet diagram, create `traffic-flow-diagram-<region>.md` as a separate review-only artifact.
+16. Export the authoritative analyzed subnet CIDR manifest from Azure resource inventory into `requests/<datetime>/query-results/subnet-cidrs.json` before finalizing the firewall draft, and use that saved file for subnet placeholder replacement.
 
 The workshop supports standard timeframe choices such as `7d`, `14d`, `30d`, `60d`, and `90d`, plus custom KQL-compatible duration values when needed.
 
@@ -80,6 +81,8 @@ Discovery and coverage:
 
 To avoid pushing large inline KQL strings through the terminal, run the query files through [scripts/Run-LogAnalyticsQuery.ps1](scripts/Run-LogAnalyticsQuery.ps1). It writes the rendered query and the JSON result to local files so the workshop output remains reproducible and easier to review.
 
+Once the analyzed subnet set is known from the per-VNet outputs, export the CIDR manifest from Azure resource inventory with [scripts/Export-AnalyzedSubnetCidrs.ps1](scripts/Export-AnalyzedSubnetCidrs.ps1) so the run persists `query-results/subnet-cidrs.json` inside the same request folder. Use [scripts/Update-FirewallDraftFromSubnetCidrs.ps1](scripts/Update-FirewallDraftFromSubnetCidrs.ps1) to consume that saved manifest when replacing draft subnet placeholders.
+
 Per-VNet internal, egress, exposure, and rule analysis:
 
 - [queries/region-internal-traffic-summary.kql](queries/region-internal-traffic-summary.kql) run once per covered VNet or scope fragment
@@ -99,6 +102,7 @@ Optional diagram or high-level reviewer summaries:
 - `traffic-flow-diagram-<region>.md` when a diagram is requested
 - `validation-questions-<region>.md`
 - `firewall-rules-draft-<region>.bicepparam`
+- `query-results/subnet-cidrs.json`
 - optional `remediation-commands-<region>.md`
 
 These artifacts are draft-only and must still go through the documented approval process before any Bicep deployment.

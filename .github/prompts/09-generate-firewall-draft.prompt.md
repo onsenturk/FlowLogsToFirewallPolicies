@@ -22,3 +22,5 @@ Requirements:
 10. If CIDRs, service tags, or FQDNs are still unresolved, keep explicit placeholders and call them out in comments instead of implying deployment readiness.
 11. If any VNet is backed only by `NSGFlowLogsFallback`, carry that lower-confidence evidence status into comments and avoid broad rules derived only from legacy fallback evidence.
 12. If a shared dependency is aggregated across multiple VNets, preserve enough context in comments or nearby review text so reviewers can still trace which VNets contributed that rule candidate.
+13. Prefer the saved `requests/<datetime>/query-results/subnet-cidrs.json` manifest for subnet CIDR replacement instead of issuing fresh Azure lookups while drafting.
+14. If a subnet CIDR cannot be resolved from the saved manifest, leave the placeholder intact and call the gap out in the review text or output log.

@@ -81,6 +81,7 @@ Use the workflow like this:
 14. if a reusable KQL query fails because of schema drift in the selected workspace, rerun it with schema-safe expressions and record that adaptation in the output
 15. ask once before creating any local draft artifacts
 16. write review-only outputs under `requests/<datetime>/`, persisting the confirmed VNet scope, covered VNets, uncovered VNets, and any requested material output log in the request artifacts
+17. export the analyzed subnet CIDR ranges from Azure resource inventory into `requests/<datetime>/query-results/subnet-cidrs.json`, then use that saved manifest when replacing subnet CIDR placeholders in the firewall draft
 
 Optional post-workshop step:
 
@@ -99,6 +100,7 @@ Expected workshop outputs:
 - `traffic-flow-diagram-<region>.md` when the customer wants an optional all-covered-VNet diagram artifact
 - `validation-questions-<region>.md`
 - `firewall-rules-draft-<region>.bicepparam` - review-only IaC draft only, not a deployed ruleset
+- `query-results/subnet-cidrs.json`
 - optional `remediation-commands-<region>.md`
 
 The workflow uses Azure CLI in customer environments and recommends a least-privilege read-only user or managed identity. Start each workshop with the logout and re-login sequence documented in [prerequisites.md](prerequisites.md), and do not deploy or modify Azure resources during discovery.
@@ -121,6 +123,8 @@ These queries now prefer exact counts of observed dimensions over sampled lists 
 - [queries/existing-flow-logs-discovery.kql](queries/existing-flow-logs-discovery.kql)
 
 For local workshop runs, keep the KQL text in files and write rendered queries plus query results to disk instead of pasting large inline queries into the terminal. Use [scripts/Run-LogAnalyticsQuery.ps1](scripts/Run-LogAnalyticsQuery.ps1) to execute a query file with placeholder replacements and save both the rendered `.kql` and the JSON result.
+
+After the covered VNet set and analyzed subnets are known, use [scripts/Export-AnalyzedSubnetCidrs.ps1](scripts/Export-AnalyzedSubnetCidrs.ps1) to export the authoritative subnet CIDR manifest from Azure resource inventory into `requests/<datetime>/query-results/subnet-cidrs.json`. Then use [scripts/Update-FirewallDraftFromSubnetCidrs.ps1](scripts/Update-FirewallDraftFromSubnetCidrs.ps1) to replace draft subnet CIDR placeholders from that saved artifact instead of issuing ad hoc Azure lookups during draft editing.
 
 ### Per-VNet analysis queries
 
