@@ -74,8 +74,11 @@ Discovery and coverage:
 
 - [queries/workspace-flow-log-coverage.kql](queries/workspace-flow-log-coverage.kql)
 - [queries/workspace-flow-log-freshness.kql](queries/workspace-flow-log-freshness.kql)
+- [queries/workspace-vnet-flow-log-targets.kql](queries/workspace-vnet-flow-log-targets.kql)
 - [queries/verify-vnet-flow-log-coverage.kql](queries/verify-vnet-flow-log-coverage.kql)
 - [queries/verify-vnet-evidence-source.kql](queries/verify-vnet-evidence-source.kql)
+
+To avoid pushing large inline KQL strings through the terminal, run the query files through [scripts/Run-LogAnalyticsQuery.ps1](scripts/Run-LogAnalyticsQuery.ps1). It writes the rendered query and the JSON result to local files so the workshop output remains reproducible and easier to review.
 
 Per-VNet internal, egress, exposure, and rule analysis:
 

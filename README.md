@@ -115,9 +115,12 @@ These queries now prefer exact counts of observed dimensions over sampled lists 
 
 - [queries/workspace-flow-log-coverage.kql](queries/workspace-flow-log-coverage.kql)
 - [queries/workspace-flow-log-freshness.kql](queries/workspace-flow-log-freshness.kql)
+- [queries/workspace-vnet-flow-log-targets.kql](queries/workspace-vnet-flow-log-targets.kql)
 - [queries/verify-vnet-flow-log-coverage.kql](queries/verify-vnet-flow-log-coverage.kql)
 - [queries/verify-vnet-evidence-source.kql](queries/verify-vnet-evidence-source.kql)
 - [queries/existing-flow-logs-discovery.kql](queries/existing-flow-logs-discovery.kql)
+
+For local workshop runs, keep the KQL text in files and write rendered queries plus query results to disk instead of pasting large inline queries into the terminal. Use [scripts/Run-LogAnalyticsQuery.ps1](scripts/Run-LogAnalyticsQuery.ps1) to execute a query file with placeholder replacements and save both the rendered `.kql` and the JSON result.
 
 ### Per-VNet analysis queries
 
