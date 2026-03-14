@@ -9,7 +9,6 @@ NTANetAnalytics
     AllowedIn = sum(tolong(AllowedInFlows)),
     AllowedOut = sum(tolong(AllowedOutFlows)),
     BytesSent = sum(tolong(BytesSrcToDest)),
-    BytesReceived = sum(tolong(BytesDestToSrc)),
-    SampleRules = make_set(AclRule, 10)
-  by TargetResourceId, FlowType, ConnectingVnets, SrcSubnet, DestSubnet, L4Protocol, L7Protocol, DestPort, FlowDirection
+    BytesReceived = sum(tolong(BytesDestToSrc))
+  by TargetResourceId, FlowType, ConnectingVnets, SrcSubnet, DestSubnet, L4Protocol, L7Protocol, DestPort, FlowDirection, AclRule
 | order by BytesSent desc, BytesReceived desc, Records desc

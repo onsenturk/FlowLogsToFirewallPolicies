@@ -16,7 +16,7 @@ let VNetCoverage =
     NTANetAnalytics
     | where TimeGenerated > ago(lookback)
     | where tostring(column_ifexists('SubType', '')) == 'FlowLog'
-    | extend Region = tolower(tostring(coalesce(column_ifexists('Region', ''), column_ifexists('TargetResourceLocation', ''), column_ifexists('TargetRegion', ''), column_ifexists('ResourceLocation', ''))))
+    | extend Region = tolower(tostring(coalesce(column_ifexists('Region', ''), column_ifexists('TargetResourceLocation', ''), column_ifexists('TargetRegion', ''), column_ifexists('ResourceLocation', ''), column_ifexists('AzureRegion', ''), column_ifexists('DestRegion', ''), column_ifexists('SrcRegion', ''))))
     | where isempty(regionFilter) or Region has regionFilter
     | extend MatchSurface = tolower(strcat(tostring(TargetResourceId), ' ', tostring(ConnectingVnets), ' ', tostring(SrcSubnet), ' ', tostring(DestSubnet)))
     | extend RequestedVnetList = split(tolower(confirmedVnetsCsv), ',')

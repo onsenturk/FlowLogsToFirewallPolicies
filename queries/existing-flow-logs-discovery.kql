@@ -9,9 +9,13 @@ let CoveredVnets = dynamic([
 let CoveredVnetNames = dynamic(['<vnet-name-1>', '<vnet-name-2>', '<vnet-name-3>']);
 search in (NTATopologyDetails, NTANetAnalytics, NTARuleRecommendation) *
 | where TimeGenerated > ago(7d)
-| where tostring(TargetResourceId) in (CoveredVnets)
-   or tostring(VirtualNetworkResourceId) in (CoveredVnets)
-   or tostring(ConnectingVnets) has_any (CoveredVnetNames)
-   or tostring(Name) has_any (CoveredVnetNames)
+| extend TargetResourceIdSafe = tostring(column_ifexists('TargetResourceId', ''))
+| extend VirtualNetworkResourceIdSafe = tostring(column_ifexists('VirtualNetworkResourceId', ''))
+| extend ConnectingVnetsSafe = tostring(column_ifexists('ConnectingVnets', ''))
+| extend NameSafe = tostring(column_ifexists('Name', ''))
+| where TargetResourceIdSafe in~ (CoveredVnets)
+  or VirtualNetworkResourceIdSafe in~ (CoveredVnets)
+  or ConnectingVnetsSafe has_any (CoveredVnetNames)
+  or NameSafe has_any (CoveredVnetNames)
 | summarize Records = count(), FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated) by $table
 | order by Records desc

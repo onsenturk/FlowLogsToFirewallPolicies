@@ -7,11 +7,12 @@ NTANetAnalytics
 | where TargetResourceId == '<subscription-id>/<resource-group>/<vnet-name>'
 | where FlowDirection == 'Inbound'
 | where FlowType in ('AzurePublic', 'ExternalPublic', 'MaliciousFlow')
+| extend SrcPublicIpsSafe = tostring(column_ifexists('SrcPublicIps', ''))
+| extend SrcPublicIpCidrsSafe = tostring(column_ifexists('SrcPublicIpCidrs', ''))
+| extend SrcServiceTagsSafe = tostring(column_ifexists('SrcServiceTags', ''))
 | summarize
     Records = count(),
     BytesIn = sum(tolong(BytesSrcToDest)),
-    BytesOut = sum(tolong(BytesDestToSrc)),
-    SampleSourceIps = make_set(SrcPublicIps, 3),
-    SampleSourceTags = make_set(SrcServiceTags, 3)
-  by FlowType, DestSubnet, DestPort, L4Protocol, L7Protocol, AclRule
+    BytesOut = sum(tolong(BytesDestToSrc))
+  by FlowType, DestSubnet, DestPort, L4Protocol, L7Protocol, AclRule, SrcPublicIpsSafe, SrcPublicIpCidrsSafe, SrcServiceTagsSafe
 | order by BytesIn desc, Records desc

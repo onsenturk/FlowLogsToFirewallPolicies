@@ -111,6 +111,8 @@ Use the KQL files by role so large workspaces do not fall back to one broad blen
 
 Use these first to identify candidate workspaces, validate freshness, and confirm covered versus uncovered VNets.
 
+These queries now prefer exact counts of observed dimensions over sampled lists so coverage decisions are not based on truncated arrays.
+
 - [queries/workspace-flow-log-coverage.kql](queries/workspace-flow-log-coverage.kql)
 - [queries/workspace-flow-log-freshness.kql](queries/workspace-flow-log-freshness.kql)
 - [queries/verify-vnet-flow-log-coverage.kql](queries/verify-vnet-flow-log-coverage.kql)
@@ -120,6 +122,8 @@ Use these first to identify candidate workspaces, validate freshness, and confir
 ### Per-VNet analysis queries
 
 Use these for the detailed internal, egress, exposure, and rule analysis once the covered VNet set is confirmed.
+
+These queries now emit exact analytical rows or exact-key aggregations for ports, rules, tags, and CIDR fields so firewall decisions can be traced back without lossy `make_set(...)` caps.
 
 - [queries/recommended-rules-by-vnet.kql](queries/recommended-rules-by-vnet.kql)
 - [queries/region-internal-traffic-summary.kql](queries/region-internal-traffic-summary.kql) when run once per covered VNet or scope fragment

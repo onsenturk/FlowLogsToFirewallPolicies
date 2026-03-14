@@ -8,7 +8,7 @@ let scopeHint = '<optional-vnet-name-or-resource-id-fragment>';
 NTANetAnalytics
 | where TimeGenerated > ago(lookback)
 | where SubType == 'FlowLog'
-| extend Region = tolower(tostring(coalesce(column_ifexists('Region', ''), column_ifexists('TargetResourceLocation', ''), column_ifexists('TargetRegion', ''), column_ifexists('ResourceLocation', ''))))
+| extend Region = tolower(tostring(coalesce(column_ifexists('Region', ''), column_ifexists('TargetResourceLocation', ''), column_ifexists('TargetRegion', ''), column_ifexists('ResourceLocation', ''), column_ifexists('AzureRegion', ''), column_ifexists('DestRegion', ''), column_ifexists('SrcRegion', ''))))
 | where isempty(regionFilter) or Region has regionFilter
 | where isempty(scopeHint)
     or tostring(TargetResourceId) has scopeHint
@@ -21,7 +21,6 @@ NTANetAnalytics
     AllowedIn = sum(tolong(AllowedInFlows)),
     AllowedOut = sum(tolong(AllowedOutFlows)),
     BytesSent = sum(tolong(BytesSrcToDest)),
-    BytesReceived = sum(tolong(BytesDestToSrc)),
-    SampleRules = make_set(AclRule, 10)
-  by Region, TargetResourceId, FlowType, ConnectingVnets, SrcSubnet, DestSubnet, L4Protocol, L7Protocol, DestPort, FlowDirection
+    BytesReceived = sum(tolong(BytesDestToSrc))
+  by Region, TargetResourceId, FlowType, ConnectingVnets, SrcSubnet, DestSubnet, L4Protocol, L7Protocol, DestPort, FlowDirection, AclRule
 | order by BytesSent desc, BytesReceived desc, Records desc

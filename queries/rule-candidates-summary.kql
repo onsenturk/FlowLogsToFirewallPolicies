@@ -10,10 +10,7 @@ NTARuleRecommendation
 | where RuleScope == 'Vnet'
 | summarize
     FlowCount = sum(TotalFlowCount),
-    PortRanges = make_set(DestPortsRanges, 20),
-    SourcePublicCidrs = make_set(SrcPublicIpCidrs, 20),
-    DestinationPublicCidrs = make_set(DestPublicIpCidrs, 20),
-    SourceServiceTags = make_set(SrcServiceTagsList, 20),
-    DestinationServiceTags = make_set(DestServiceTagsList, 20)
-  by RecommendedAction, RecommendedRuleName, L4Protocol, TargetResourceId
+    FirstSeen = min(StartTime),
+    LastSeen = max(EndTime)
+  by RecommendedAction, RecommendedRuleName, L4Protocol, TargetResourceId, DestPortsRanges, SrcPublicIpCidrs, DestPublicIpCidrs, SrcServiceTagsList, DestServiceTagsList
 | order by FlowCount desc

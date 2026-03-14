@@ -10,7 +10,7 @@ let Egress =
     | where TimeGenerated > ago(lookback)
     | where SubType == 'FlowLog'
     | where FlowDirection == 'Outbound'
-    | extend Region = tolower(tostring(coalesce(column_ifexists('Region', ''), column_ifexists('TargetResourceLocation', ''), column_ifexists('TargetRegion', ''), column_ifexists('ResourceLocation', ''))))
+    | extend Region = tolower(tostring(coalesce(column_ifexists('Region', ''), column_ifexists('TargetResourceLocation', ''), column_ifexists('TargetRegion', ''), column_ifexists('ResourceLocation', ''), column_ifexists('AzureRegion', ''), column_ifexists('DestRegion', ''), column_ifexists('SrcRegion', ''))))
     | where isempty(regionFilter) or Region has regionFilter
     | where isempty(scopeHint)
         or tostring(TargetResourceId) has scopeHint
@@ -28,33 +28,28 @@ let Egress =
     | summarize
         Records = count(),
         AllowedOut = sum(tolong(AllowedOutFlows)),
-        BytesSent = sum(tolong(BytesSrcToDest)),
-        Ports = make_set(DestPort, 10),
-        Protocols = make_set(tostring(coalesce(column_ifexists('L7Protocol', ''), column_ifexists('L4Protocol', ''))), 10),
-        SampleTags = make_set(DestServiceTagsSafe, 5)
-      by ResultType = 'Egress', Region, TargetResourceId, SrcSubnet, NormalizedService;
+                BytesSent = sum(tolong(BytesSrcToDest))
+            by ResultType = 'Egress', Region, TargetResourceId, SrcSubnet, NormalizedService, DestPort, Protocol = tostring(coalesce(column_ifexists('L7Protocol', ''), column_ifexists('L4Protocol', ''))), DestServiceTagsSafe, DestPublicIpsSafe;
 let Exposure =
     NTANetAnalytics
     | where TimeGenerated > ago(lookback)
     | where SubType == 'FlowLog'
     | where FlowDirection == 'Inbound'
-    | extend Region = tolower(tostring(coalesce(column_ifexists('Region', ''), column_ifexists('TargetResourceLocation', ''), column_ifexists('TargetRegion', ''), column_ifexists('ResourceLocation', ''))))
+    | extend Region = tolower(tostring(coalesce(column_ifexists('Region', ''), column_ifexists('TargetResourceLocation', ''), column_ifexists('TargetRegion', ''), column_ifexists('ResourceLocation', ''), column_ifexists('AzureRegion', ''), column_ifexists('DestRegion', ''), column_ifexists('SrcRegion', ''))))
     | where isempty(regionFilter) or Region has regionFilter
     | where isempty(scopeHint)
         or tostring(TargetResourceId) has scopeHint
         or tostring(DestSubnet) has scopeHint
     | extend SrcPublicIpsSafe = tostring(column_ifexists('SrcPublicIps', ''))
     | extend SrcPublicIpCidrsSafe = tostring(column_ifexists('SrcPublicIpCidrs', ''))
+    | extend SrcServiceTagsSafe = tostring(column_ifexists('SrcServiceTags', ''))
     | extend ExposureClass = case(
         isnotempty(SrcPublicIpsSafe) or isnotempty(SrcPublicIpCidrsSafe), 'PublicInbound',
         'OtherInbound')
     | summarize
         Records = count(),
         AllowedIn = sum(tolong(AllowedInFlows)),
-        BytesReceived = sum(tolong(BytesDestToSrc)),
-        Ports = make_set(DestPort, 10),
-        Protocols = make_set(tostring(column_ifexists('L4Protocol', '')), 10),
-        SampleRules = make_set(tostring(column_ifexists('AclRule', '')), 10)
-      by ResultType = 'Exposure', Region, TargetResourceId, DestSubnet, ExposureClass;
+        BytesReceived = sum(tolong(BytesDestToSrc))
+      by ResultType = 'Exposure', Region, TargetResourceId, DestSubnet, ExposureClass, DestPort, Protocol = tostring(column_ifexists('L4Protocol', '')), AclRule = tostring(column_ifexists('AclRule', '')), SrcPublicIpsSafe, SrcPublicIpCidrsSafe, SrcServiceTagsSafe;
 union Egress, Exposure
 | order by ResultType asc, Records desc
