@@ -42,6 +42,7 @@ name: "Azure Firewall Workshop Guardrails"
 
 - `traffic-summary-<region>.md` - must persist the confirmed VNet scope, per-VNet evidence source, covered VNets, and uncovered VNets
 - `output-log-<region>.md` - should capture material workflow outputs such as discovery results, classifications, exclusions, and created artifacts without logging the user prompts verbatim
+- `traffic-flow-diagram-<region>.md` - optional review-only diagram artifact that may summarize all confirmed covered VNets without replacing the per-VNet evidence contract
 - `validation-questions-<region>.md` - should include follow-up questions for uncovered VNets or coverage gaps
 - `firewall-rules-draft-<region>.bicepparam` - review-only infrastructure-as-code draft, never a live rule change
 - Optional: `remediation-commands-<region>.md`

@@ -9,7 +9,8 @@ Create the traffic summary artifact in the confirmed request folder.
 Requirements:
 
 1. File name: `traffic-summary-<region>.md`
-2. Include a `Scope` section that persists the confirmed VNet scope, evidence source by VNet, covered VNets, and uncovered VNets or exclusions.
+2. Include a `Run Metadata` section that persists the chosen scope mode, the discovery and coverage timeframe, the detailed analysis timeframe, and whether an all-covered-VNet traffic diagram was requested.
+3. Include a `Scope` section that persists the confirmed VNet scope, evidence source by VNet, covered VNets, and uncovered VNets or exclusions.
 3. Separate evidence, assumptions, recommendations, and unresolved questions.
 4. Cover internal traffic, egress, and inbound exposure.
 5. Keep the document customer-readable.

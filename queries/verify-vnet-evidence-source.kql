@@ -3,7 +3,7 @@
 // Purpose: classify each confirmed VNet as VNetFlowLogs, NSGFlowLogsFallback, or Uncovered.
 // Replace the placeholders before execution.
 // This classifies each confirmed VNet as VNetFlowLogs, NSGFlowLogsFallback, or Uncovered based on observed workspace evidence.
-let lookback = 30d;
+let lookback = 7d;
 let regionFilter = tolower('<region-or-empty>');
 let confirmedVnetsCsv = '<comma-separated-vnet-name-or-resource-id-fragments>';
 let RequestedVnets =

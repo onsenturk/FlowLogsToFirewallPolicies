@@ -54,6 +54,7 @@ Required setup for the workshop:
 12. Ask once before creating local request artifacts.
 13. Write review-only outputs under `requests/<datetime>/`.
 14. If the customer asks to capture substantive workflow results in the request folder, create `output-log-<region>.md` alongside the other approved artifacts.
+15. If the customer asks for an optional all-covered-VNet diagram, create `traffic-flow-diagram-<region>.md` as a separate review-only artifact.
 
 The workshop supports standard timeframe choices such as `7d`, `14d`, `30d`, `60d`, and `90d`, plus custom KQL-compatible duration values when needed.
 
@@ -92,6 +93,7 @@ Optional diagram or high-level reviewer summaries:
 
 - `traffic-summary-<region>.md`
 - `output-log-<region>.md` when output capture is requested
+- `traffic-flow-diagram-<region>.md` when a diagram is requested
 - `validation-questions-<region>.md`
 - `firewall-rules-draft-<region>.bicepparam`
 - optional `remediation-commands-<region>.md`

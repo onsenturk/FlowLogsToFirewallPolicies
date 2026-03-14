@@ -8,7 +8,7 @@ let CoveredVnets = dynamic([
 ]);
 let CoveredVnetNames = dynamic(['<vnet-name-1>', '<vnet-name-2>', '<vnet-name-3>']);
 search in (NTATopologyDetails, NTANetAnalytics, NTARuleRecommendation) *
-| where TimeGenerated > ago(30d)
+| where TimeGenerated > ago(7d)
 | where tostring(TargetResourceId) in (CoveredVnets)
    or tostring(VirtualNetworkResourceId) in (CoveredVnets)
    or tostring(ConnectingVnets) has_any (CoveredVnetNames)

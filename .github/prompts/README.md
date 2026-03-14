@@ -21,12 +21,13 @@ Use these prompts in order for customer workshops that analyze existing Azure fl
 7. `/07-confirm-output-creation`
 8. `/08-create-traffic-summary`
 9. `/08a-create-output-log` when the user wants a review-only record of material workflow outputs inside the request folder
-10. `/09-generate-firewall-draft`
-11. `/10-close-workshop`
+10. `/08b-create-traffic-diagram` when the user wants an optional all-covered-VNet traffic-flow diagram inside the request folder
+11. `/09-generate-firewall-draft`
+12. `/10-close-workshop`
 
 Optional post-workshop step:
 
-12. `/11-generate-remediation-commands` only when the customer explicitly asks for review-only CLI commands to enable VNet flow logs to a chosen workspace
+13. `/11-generate-remediation-commands` only when the customer explicitly asks for review-only CLI commands to enable VNet flow logs to a chosen workspace
 
 ## Guardrails
 
@@ -52,11 +53,13 @@ Optional post-workshop step:
 ## Discovery handoff
 
 - `/02-discover-workspaces` should end by asking the exact follow-up question that makes the customer choose the workspace for the rest of the analysis.
-- `/03-confirm-workspace-and-scope` is the hard handoff gate after workspace selection and should return the chosen scope mode, the confirmed timeframe, evidence source by VNet, covered VNets, excluded VNets, and any remaining gaps before prompts 04 and 05 are used.
+- `/03-confirm-workspace-and-scope` is the hard handoff gate after workspace selection and should return the chosen scope mode, the confirmed discovery and coverage timeframe, the detailed analysis timeframe, evidence source by VNet, covered VNets, excluded VNets, whether a diagram was requested, and any remaining gaps before prompts 04 and 05 are used.
 - `/04-analyze-internal-traffic` and `/05-analyze-egress-and-exposure` should keep `scopeHint` explicit by running once per covered VNet or equivalent resource scope fragment when more than one covered VNet remains, and the returned analysis should stay segmented by that explicit scope.
+- `/08-create-traffic-summary`, `/08a-create-output-log`, and `/10-close-workshop` should preserve scope mode, timeframes, exclusions, and diagram intent rather than collapsing back to the older single-timeframe flow.
 - `/09-generate-firewall-draft` should synthesize one aggregated review-only draft from the per-VNet analysis outputs and carry forward any lower-confidence or unresolved items explicitly.
 - Request artifacts should persist the confirmed VNet scope, evidence source by VNet, covered VNets, and uncovered VNets rather than relying on chat context only.
 - If output capture is requested, the drafting flow should also create `output-log-<region>.md` with substantive workflow outputs only, not the raw user prompts.
+- If a diagram is requested, the drafting flow should create `traffic-flow-diagram-<region>.md` as a separate optional artifact and keep it distinct from the rule-evidence contract.
 
 ## Query roles
 
@@ -90,6 +93,7 @@ Use the KQL files by role so large workspaces stay on the per-VNet path after co
 
 - `traffic-summary-<region>.md`
 - `output-log-<region>.md` when output capture is requested
+- `traffic-flow-diagram-<region>.md` when a diagram is requested
 - `validation-questions-<region>.md`
 - `firewall-rules-draft-<region>.bicepparam`
 - `firewall-rules-draft-<region>.bicepparam` - review-only IaC draft only

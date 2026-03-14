@@ -15,7 +15,7 @@ Use these rules:
 5. Evaluate freshness and coverage before recommending a workspace.
 6. If evidence is split, recommend a primary workspace and list secondary candidates.
 7. Explicitly identify which candidate workspaces appear to contain VNet flow-log evidence, which appear to have only NSG-based fallback evidence, and which do not yet show usable evidence.
-8. For the recommended workspace, propose the candidate VNets or resource scopes observed for the relevant evidence set.
+8. Do not force final VNet proposal or scope confirmation in this step. That happens only after the customer chooses a workspace and the workflow enters `/03-confirm-workspace-and-scope`.
 9. Keep the result concise and evidence-based.
 10. End with the exact customer question that asks the user to choose which candidate workspace should be used for the rest of the analysis.
 

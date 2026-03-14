@@ -2,7 +2,7 @@
 // Use this query inside one candidate Log Analytics workspace at a time.
 // Purpose: check whether the workspace contains relevant flow-log evidence before detailed analysis.
 // Replace the placeholders before execution.
-let lookback = 30d;
+let lookback = 7d;
 let regionFilter = tolower('<region-or-empty>');
 let scopeHint = '<optional-vnet-name-or-resource-id-fragment>';
 union isfuzzy=true

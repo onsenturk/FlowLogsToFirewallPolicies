@@ -84,7 +84,7 @@ Use the workflow like this:
 
 Optional post-workshop step:
 
-11. if the customer explicitly asks for remediation guidance, generate a review-only `remediation-commands-<region>.md` artifact with Azure CLI commands to enable VNet flow logs to the chosen workspace
+17. if the customer explicitly asks for remediation guidance, generate a review-only `remediation-commands-<region>.md` artifact with Azure CLI commands to enable VNet flow logs to the chosen workspace
 
 Supported analysis timeframes are the standard workshop choices `7d`, `14d`, `30d`, `60d`, and `90d`, plus custom KQL-compatible duration values such as `21d` when the customer requests a different lookback window.
 
@@ -96,6 +96,7 @@ Expected workshop outputs:
 
 - `traffic-summary-<region>.md`
 - `output-log-<region>.md` when the customer wants a concise record of material workflow outputs
+- `traffic-flow-diagram-<region>.md` when the customer wants an optional all-covered-VNet diagram artifact
 - `validation-questions-<region>.md`
 - `firewall-rules-draft-<region>.bicepparam` - review-only IaC draft only, not a deployed ruleset
 - optional `remediation-commands-<region>.md`
