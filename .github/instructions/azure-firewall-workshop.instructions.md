@@ -36,7 +36,7 @@ name: "Azure Firewall Workshop Guardrails"
 7. Analyze internal traffic, egress, and inbound exposure for the covered VNets only, keeping the evidence explicit per covered VNet or equivalent resource scope fragment and preserving whether that evidence came from `VNetFlowLogs` or `NSGFlowLogsFallback`.
 8. Treat any all-covered-VNet traffic diagram as a separate optional artifact and do not let it replace the per-VNet evidence contract for rules.
 9. Ask once for confirmation before creating local request outputs.
-10. Write review-only artifacts under `requests/<datetime>/`, persist the confirmed VNet scope, per-VNet evidence source, covered VNets, uncovered VNets, and material workflow outputs in the request artifacts, and keep the analyzed subnet CIDR manifest in the same request folder.
+10. Write review-only artifacts under `requests/<datetime>/`, persist the confirmed VNet scope, per-VNet evidence source, covered VNets, uncovered VNets, and material workflow outputs in the request artifacts, keep the analyzed subnet CIDR manifest in the same request folder, and generate both firewall and NSG infrastructure-as-code drafts for the analyzed traffic.
 
 ## Output Contract
 
@@ -45,6 +45,7 @@ name: "Azure Firewall Workshop Guardrails"
 - `traffic-flow-diagram-<region>.md` - optional review-only diagram artifact that may summarize all confirmed covered VNets without replacing the per-VNet evidence contract
 - `validation-questions-<region>.md` - should include follow-up questions for uncovered VNets or coverage gaps
 - `firewall-rules-draft-<region>.bicepparam` - review-only infrastructure-as-code draft, never a live rule change
+- `nsg-rules-draft-<region>.bicepparam` - review-only NSG infrastructure-as-code draft for intra-subnet and inter-subnet rules, never a live NSG change
 - `query-results/subnet-cidrs.json` - read-only subnet CIDR manifest exported from Azure resource inventory for the analyzed subnets
 - Optional: `remediation-commands-<region>.md`
 - Optional: `discovery-summary-<region>.md`

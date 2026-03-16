@@ -34,8 +34,8 @@ The repository now also contains a GitHub Copilot-first workflow layer for custo
 2. Flow logs are written to the regional storage account.
 3. Traffic Analytics enriches the flow data and sends recommendations into Log Analytics.
 4. Operators run `scripts/New-FirewallRulesFromTraffic.ps1` to query NTANetAnalytics, classify traffic, and generate review-only JSON rule files.
-5. Approved findings are converted into Azure Firewall Policy rule collection groups via the static Bicep templates.
-6. Rule collection groups are deployed only after business and security approval.
+5. Approved findings are converted into Azure Firewall Policy rule collection groups via the static Bicep templates and into NSG definitions via the NSG Bicep template.
+6. Rule collection groups and NSGs are deployed only after business and security approval.
 
 ## Workshop orchestration flow
 
@@ -52,7 +52,7 @@ The repository now also contains a GitHub Copilot-first workflow layer for custo
 11. An optional traffic-flow diagram may summarize all confirmed covered VNets, but it does not replace the per-VNet evidence contract for firewall-rule generation.
 12. Copilot asks once for confirmation before creating any local request artifacts.
 13. The drafting agent writes review-only outputs under `requests/<datetime>/`.
-14. Generated firewall rule content remains a local infrastructure-as-code draft, stays approval-pending, and is synthesized from the per-VNet evidence rather than a single blended workspace-wide summary.
+14. Generated firewall rule content and NSG rule content remain local infrastructure-as-code drafts, stay approval-pending, and are synthesized from the per-VNet evidence rather than a single blended workspace-wide summary.
 15. If the customer explicitly asks for remediation guidance after the workshop, the workflow may generate a separate review-only artifact with CLI commands to enable VNet flow logs to the chosen workspace.
 
 ## Security model

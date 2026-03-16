@@ -77,7 +77,7 @@ Use the workflow like this:
 14. if a reusable KQL query fails because of schema drift in the selected workspace, rerun it with schema-safe expressions and record that adaptation in the output
 15. ask once before creating any local draft artifacts
 16. write review-only outputs under `requests/<datetime>/`, persisting the confirmed VNet scope, covered VNets, uncovered VNets, and any requested material output log in the request artifacts
-17. export the analyzed subnet CIDR ranges from Azure resource inventory into `requests/<datetime>/query-results/subnet-cidrs.json`, then use that saved manifest when replacing subnet CIDR placeholders in the firewall draft
+17. export the analyzed subnet CIDR ranges from Azure resource inventory into `requests/<datetime>/query-results/subnet-cidrs.json`, then use that saved manifest when replacing subnet CIDR placeholders in the firewall and NSG drafts
 
 Optional post-workshop step:
 
@@ -96,6 +96,7 @@ Expected workshop outputs:
 - `traffic-flow-diagram-<region>.md` when the customer wants an optional all-covered-VNet diagram artifact
 - `validation-questions-<region>.md`
 - `firewall-rules-draft-<region>.bicepparam` - review-only IaC draft only, not a deployed ruleset
+- `nsg-rules-draft-<region>.bicepparam` - review-only NSG IaC draft for intra-subnet and inter-subnet rules, not deployed NSG changes
 - `query-results/subnet-cidrs.json`
 - optional `remediation-commands-<region>.md`
 

@@ -31,6 +31,8 @@ The original intent was to use NSG flow logs. That conflicts with the current Az
 - keep reusable KQL contracts schema-safe across tenant variations where practical
 - allow an optional post-workshop remediation artifact that contains review-only CLI commands to enable VNet flow logs to a chosen workspace when the customer explicitly asks
 - keep any generated firewall-rule artifact limited to review-only infrastructure-as-code output and never apply or populate live Azure Firewall rules automatically during the workshop
+- keep any generated NSG-rule artifact limited to review-only infrastructure-as-code output and never apply or modify live NSGs automatically during the workshop
+- generate both Azure Firewall and NSG infrastructure-as-code drafts at the end of the analysis so that intra-subnet and inter-subnet rules are captured alongside egress, ingress, and inter-VNet rules
 
 ## Out of scope
 

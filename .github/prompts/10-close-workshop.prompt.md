@@ -17,4 +17,4 @@ Return:
 5. The main internal, egress, and exposure findings.
 6. The created artifacts under `requests/<datetime>/`, including any output-log artifact or traffic-flow diagram when one was requested.
 6. Any recommendation-only workflow or prompt improvements identified during the run.
-7. The explicit customer approvals still required before any firewall deployment.
+7. The explicit customer approvals still required before any firewall or NSG deployment.

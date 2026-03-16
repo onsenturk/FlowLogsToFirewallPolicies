@@ -23,11 +23,12 @@ Use these prompts in order for customer workshops that analyze existing Azure fl
 9. `/08a-create-output-log` when the user wants a review-only record of material workflow outputs inside the request folder
 10. `/08b-create-traffic-diagram` when the user wants an optional all-covered-VNet traffic-flow diagram inside the request folder
 11. `/09-generate-firewall-draft`
-12. `/10-close-workshop`
+12. `/09a-generate-nsg-draft`
+13. `/10-close-workshop`
 
 Optional post-workshop step:
 
-13. `/11-generate-remediation-commands` only when the customer explicitly asks for review-only CLI commands to enable VNet flow logs to a chosen workspace
+14. `/11-generate-remediation-commands` only when the customer explicitly asks for review-only CLI commands to enable VNet flow logs to a chosen workspace
 
 ## Guardrails
 
@@ -49,6 +50,7 @@ Optional post-workshop step:
 - Keep all outputs under `requests/<datetime>/`.
 - Treat every output as review-only until explicitly approved.
 - Treat firewall draft outputs as local IaC artifacts only. They must not create, modify, or deploy live Azure Firewall rules automatically.
+- Treat NSG draft outputs as local IaC artifacts only. They must not create, modify, or deploy live NSGs automatically.
 
 ## Discovery handoff
 
@@ -57,6 +59,7 @@ Optional post-workshop step:
 - `/04-analyze-internal-traffic` and `/05-analyze-egress-and-exposure` should keep `scopeHint` explicit by running once per covered VNet or equivalent resource scope fragment when more than one covered VNet remains, and the returned analysis should stay segmented by that explicit scope.
 - `/08-create-traffic-summary`, `/08a-create-output-log`, and `/10-close-workshop` should preserve scope mode, timeframes, exclusions, and diagram intent rather than collapsing back to the older single-timeframe flow.
 - `/09-generate-firewall-draft` should synthesize one aggregated review-only draft from the per-VNet analysis outputs and carry forward any lower-confidence or unresolved items explicitly.
+- `/09a-generate-nsg-draft` should synthesize one aggregated review-only NSG draft from the per-VNet internal traffic analysis, grouping rules by destination subnet, and carry forward any lower-confidence or unresolved items explicitly.
 - Request artifacts should persist the confirmed VNet scope, evidence source by VNet, covered VNets, and uncovered VNets rather than relying on chat context only.
 - If output capture is requested, the drafting flow should also create `output-log-<region>.md` with substantive workflow outputs only, not the raw user prompts.
 - If a diagram is requested, the drafting flow should create `traffic-flow-diagram-<region>.md` as a separate optional artifact and keep it distinct from the rule-evidence contract.
@@ -73,6 +76,7 @@ All traffic analysis uses inline `NTANetAnalytics` queries via `scripts/New-Fire
 - `validation-questions-<region>.md`
 - `firewall-rules-draft-<region>.bicepparam`
 - `firewall-rules-draft-<region>.bicepparam` - review-only IaC draft only
+- `nsg-rules-draft-<region>.bicepparam` - review-only NSG IaC draft for intra-subnet and inter-subnet rules
 - `query-results/subnet-cidrs.json`
 - Optional: `remediation-commands-<region>.md`
 - Optional: `discovery-summary-<region>.md`
