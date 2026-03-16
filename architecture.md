@@ -33,8 +33,8 @@ The repository now also contains a GitHub Copilot-first workflow layer for custo
 1. Azure Network Watcher captures traffic metadata for the selected target resources.
 2. Flow logs are written to the regional storage account.
 3. Traffic Analytics enriches the flow data and sends recommendations into Log Analytics.
-4. Operators run the KQL queries in [queries/recommended-rules-by-vnet.kql](queries/recommended-rules-by-vnet.kql) and [queries/rule-candidates-summary.kql](queries/rule-candidates-summary.kql), using exact analytical rows or exact-key aggregations instead of truncated sampled arrays for decision-grade review.
-5. Approved findings are converted into Azure Firewall Policy rule collection groups.
+4. Operators run `scripts/New-FirewallRulesFromTraffic.ps1` to query NTANetAnalytics, classify traffic, and generate review-only JSON rule files.
+5. Approved findings are converted into Azure Firewall Policy rule collection groups via the static Bicep templates.
 6. Rule collection groups are deployed only after business and security approval.
 
 ## Workshop orchestration flow

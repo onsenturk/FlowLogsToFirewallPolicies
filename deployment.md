@@ -15,7 +15,7 @@
 3. Run a subscription-scope `what-if` before any deployment.
 4. Deploy the template only after the review output matches expectations.
 5. Wait for flow data to accumulate.
-6. Run the KQL queries in the `queries/` folder against the new workspace.
+6. Run `scripts/New-FirewallRulesFromTraffic.ps1` against the new workspace.
 7. Review rule recommendations with networking and security stakeholders.
 8. Populate [infra/firewall-policy-rules.sample.bicepparam](infra/firewall-policy-rules.sample.bicepparam) or the `firewallPolicyRuleCollectionGroups` parameter only after approval.
 9. Run `what-if` again before applying approved rule collections.
@@ -67,33 +67,15 @@ If the customer wants a traffic-flow diagram, the diagram may summarize all conf
 
 If the selected workspace schema differs from the reusable KQL templates, adapt the queries with schema-safe expressions such as `column_ifexists(...)` and record that adaptation in the review output.
 
-### Query selection guidance
+### Traffic analysis
 
-Use the queries by category so large workspaces stay on the per-VNet path once coverage is confirmed.
+Run the single-command workflow to query NTANetAnalytics, classify traffic, and generate review-only JSON rule files:
 
-Discovery and coverage:
+```powershell
+./scripts/New-FirewallRulesFromTraffic.ps1 -WorkspaceId '<workspace-id>'
+```
 
-- [queries/workspace-flow-log-coverage.kql](queries/workspace-flow-log-coverage.kql)
-- [queries/workspace-flow-log-freshness.kql](queries/workspace-flow-log-freshness.kql)
-- [queries/workspace-vnet-flow-log-targets.kql](queries/workspace-vnet-flow-log-targets.kql)
-- [queries/verify-vnet-flow-log-coverage.kql](queries/verify-vnet-flow-log-coverage.kql)
-- [queries/verify-vnet-evidence-source.kql](queries/verify-vnet-evidence-source.kql)
-
-To avoid pushing large inline KQL strings through the terminal, run the query files through [scripts/Run-LogAnalyticsQuery.ps1](scripts/Run-LogAnalyticsQuery.ps1). It writes the rendered query and the JSON result to local files so the workshop output remains reproducible and easier to review.
-
-Once the analyzed subnet set is known from the per-VNet outputs, export the CIDR manifest from Azure resource inventory with [scripts/Export-AnalyzedSubnetCidrs.ps1](scripts/Export-AnalyzedSubnetCidrs.ps1) so the run persists `query-results/subnet-cidrs.json` inside the same request folder. Use [scripts/Update-FirewallDraftFromSubnetCidrs.ps1](scripts/Update-FirewallDraftFromSubnetCidrs.ps1) to consume that saved manifest when replacing draft subnet placeholders.
-
-Per-VNet internal, egress, exposure, and rule analysis:
-
-- [queries/region-internal-traffic-summary.kql](queries/region-internal-traffic-summary.kql) run once per covered VNet or scope fragment
-- [queries/region-egress-and-exposure-summary.kql](queries/region-egress-and-exposure-summary.kql) run once per covered VNet or scope fragment
-- [queries/recommended-rules-by-vnet.kql](queries/recommended-rules-by-vnet.kql)
-- [queries/rule-candidates-summary.kql](queries/rule-candidates-summary.kql) only after the scope is narrowed
-
-Optional diagram or high-level reviewer summaries:
-
-- [queries/region-internal-traffic-summary.kql](queries/region-internal-traffic-summary.kql) when intentionally aggregated for a traffic-flow diagram
-- [queries/region-egress-and-exposure-summary.kql](queries/region-egress-and-exposure-summary.kql) when intentionally aggregated for a traffic-flow diagram
+See the README [Traffic baseline workflow](README.md#traffic-baseline-workflow) section for full options and deploy commands.
 
 ### Expected local outputs
 
@@ -117,7 +99,7 @@ If the customer explicitly asks for remediation guidance after the workshop, use
 - storage account exists in the same region as the target resources
 - flow log resources exist in `NetworkWatcherRG`
 - Traffic Analytics is enabled for every flow log
-- `NTARuleRecommendation` data appears in Log Analytics after traffic has been processed
+- `NTANetAnalytics` data appears in Log Analytics after traffic has been processed
 - Azure Firewall Policy exists with empty or approved-only rule collections
 
 ## Rollback guidance

@@ -17,7 +17,7 @@ After that, ask the customer to choose one of these scope modes:
 
 Then confirm the analysis timeframe for the detailed traffic analysis. The detailed analysis timeframe may stay at `7d` or use a different customer-approved lookback.
 
-Use [queries/verify-vnet-evidence-source.kql](../../queries/verify-vnet-evidence-source.kql) to classify the evidence source for each confirmed VNet.
+Query `NTANetAnalytics` to classify the evidence source for each confirmed VNet.
 If the customer provides a custom timeframe, normalize it to a valid KQL duration such as `21d` or `12h` before continuing.
 If Azure CLI and any extension-backed or MCP-backed Azure tooling are both in use, explicitly confirm that they are aligned to the same tenant and subscription before trusting the results.
 If a confirmed VNet appears to be a hub, transit, or shared-services VNet and is classified as `Uncovered`, treat that as a blocking gap for any full production-scope draft unless the customer narrows the scope or explicitly accepts a partial review-only draft.

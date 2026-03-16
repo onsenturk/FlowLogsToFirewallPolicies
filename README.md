@@ -31,13 +31,9 @@ New NSG flow logs can no longer be created after June 30, 2025. Because of that 
 - [infra/modules/monitoring-stack.bicep](infra/modules/monitoring-stack.bicep) - shared monitoring resources
 - [infra/modules/flow-log.bicep](infra/modules/flow-log.bicep) - regional virtual network flow log deployment
 - [infra/firewall-policy-rules.sample.bicepparam](infra/firewall-policy-rules.sample.bicepparam) - approved-rule template only, used as the shape for review-only IaC drafts
-- [queries/recommended-rules-by-vnet.kql](queries/recommended-rules-by-vnet.kql) - Traffic Analytics recommendation query
-- [queries/rule-candidates-summary.kql](queries/rule-candidates-summary.kql) - summarized rule candidate query
-- [queries/existing-flow-logs-discovery.kql](queries/existing-flow-logs-discovery.kql) - discovery query for the current tenant setup
-- [queries/existing-recommended-rules.kql](queries/existing-recommended-rules.kql) - rule recommendations for the currently covered VNets
-- [queries/existing-east-west-candidates.kql](queries/existing-east-west-candidates.kql) - east-west candidate flow analysis for the current VNets
-- [queries/existing-internet-egress-candidates.kql](queries/existing-internet-egress-candidates.kql) - internet egress candidate analysis for the current VNets
-- [queries/existing-inbound-exposure-candidates.kql](queries/existing-inbound-exposure-candidates.kql) - public inbound exposure review for the current VNets
+- [scripts/New-FirewallRulesFromTraffic.ps1](scripts/New-FirewallRulesFromTraffic.ps1) - single-command workflow: queries NTANetAnalytics traffic, classifies, prompts for high ports, outputs JSON
+- [infra/modules/firewall-observed-rules.bicep](infra/modules/firewall-observed-rules.bicep) - static Bicep template that deploys firewall rules from JSON
+- [infra/modules/nsg-observed-rules.bicep](infra/modules/nsg-observed-rules.bicep) - static Bicep template that deploys NSG rules from JSON
 - [prerequisites.md](prerequisites.md) - required operator setup for read-only workshop execution
 - [.github/prompts/README.md](.github/prompts/README.md) - active GitHub Copilot prompt library for customer workshops
 - [firewall-policy-rules.md](firewall-policy-rules.md) - approval workflow and rule documentation guidance
@@ -48,7 +44,7 @@ New NSG flow logs can no longer be created after June 30, 2025. Because of that 
 
 The repository can still provision new observability resources, but the current tenant already has usable virtual network flow logs.
 
-For the current analysis phase, use the documented existing environment in [azure.md](azure.md) and the `queries/existing-*.kql` files instead of creating duplicate flow logs.
+For the current analysis phase, use the documented existing environment in [azure.md](azure.md) and the `New-FirewallRulesFromTraffic.ps1` script instead of creating duplicate flow logs.
 
 Any customer-specific evidence and candidate rule sets should be kept in private request artifacts or private working branches. The public repository keeps only sanitized guidance and reusable query patterns.
 
@@ -105,48 +101,47 @@ Expected workshop outputs:
 
 The workflow uses Azure CLI in customer environments and recommends a least-privilege read-only user or managed identity. Start each workshop with the logout and re-login sequence documented in [prerequisites.md](prerequisites.md), and do not deploy or modify Azure resources during discovery.
 
-## Query roles
+## Traffic baseline workflow
 
-Use the KQL files by role so large workspaces do not fall back to one broad blended analysis run.
+Use this to derive firewall and NSG rules directly from observed IP-level traffic. One command, JSON output, static Bicep templates.
 
-### Discovery and coverage queries
+```powershell
+./scripts/New-FirewallRulesFromTraffic.ps1 -WorkspaceId '<workspace-id>'
+```
 
-Use these first to identify candidate workspaces, validate freshness, and confirm covered versus uncovered VNets.
+What happens:
 
-These queries now prefer exact counts of observed dimensions over sampled lists so coverage decisions are not based on truncated arrays.
+1. Queries `NTANetAnalytics` (default 7d, unfiltered)
+2. Discovers subnet CIDRs via `az network vnet list`
+3. Classifies: `Egress` / `Ingress` / `InterVNet` (→ FW), `InterSubnet` / `IntraSubnet` (→ NSG)
+4. Prompts per destination with ephemeral ports (>= 49152): **[A]llow all**, **[R]ange**, **[S]kip**
+5. Writes IP-level JSON — not Bicep. Bicep templates are static.
 
-- [queries/workspace-flow-log-coverage.kql](queries/workspace-flow-log-coverage.kql)
-- [queries/workspace-flow-log-freshness.kql](queries/workspace-flow-log-freshness.kql)
-- [queries/workspace-vnet-flow-log-targets.kql](queries/workspace-vnet-flow-log-targets.kql)
-- [queries/verify-vnet-flow-log-coverage.kql](queries/verify-vnet-flow-log-coverage.kql)
-- [queries/verify-vnet-evidence-source.kql](queries/verify-vnet-evidence-source.kql)
-- [queries/existing-flow-logs-discovery.kql](queries/existing-flow-logs-discovery.kql)
+Options: `-Lookback '14d'` | `-NonInteractive` | `-Location 'westeurope'` | `-OutputFolder './custom/'`
 
-For local workshop runs, keep the KQL text in files and write rendered queries plus query results to disk instead of pasting large inline queries into the terminal. Use [scripts/Run-LogAnalyticsQuery.ps1](scripts/Run-LogAnalyticsQuery.ps1) to execute a query file with placeholder replacements and save both the rendered `.kql` and the JSON result.
+Outputs under `requests/<timestamp>/`:
 
-After the covered VNet set and analyzed subnets are known, use [scripts/Export-AnalyzedSubnetCidrs.ps1](scripts/Export-AnalyzedSubnetCidrs.ps1) to export the authoritative subnet CIDR manifest from Azure resource inventory into `requests/<datetime>/query-results/subnet-cidrs.json`. Then use [scripts/Update-FirewallDraftFromSubnetCidrs.ps1](scripts/Update-FirewallDraftFromSubnetCidrs.ps1) to replace draft subnet CIDR placeholders from that saved artifact instead of issuing ad hoc Azure lookups during draft editing.
+| File | Purpose |
+|---|---|
+| `firewall-rules.json` | Feeds into `infra/modules/firewall-observed-rules.bicep` |
+| `nsg-rules.json` | Feeds into `infra/modules/nsg-observed-rules.bicep` |
+| `high-port-skipped.json` | Skipped ephemeral-port flows |
+| `query-results/traffic.json` | Raw query output |
+| `query-results/subnet-cidrs.json` | Discovered subnet CIDRs |
 
-### Per-VNet analysis queries
+Deploy after review:
 
-Use these for the detailed internal, egress, exposure, and rule analysis once the covered VNet set is confirmed.
+```powershell
+# Firewall rules
+az deployment group create -g <rg> \
+  -f infra/modules/firewall-observed-rules.bicep \
+  -p firewallPolicyName='<name>' rules=@requests/<ts>/firewall-rules.json
 
-These queries now emit exact analytical rows or exact-key aggregations for ports, rules, tags, and CIDR fields so firewall decisions can be traced back without lossy `make_set(...)` caps.
-
-- [queries/recommended-rules-by-vnet.kql](queries/recommended-rules-by-vnet.kql)
-- [queries/region-internal-traffic-summary.kql](queries/region-internal-traffic-summary.kql) when run once per covered VNet or scope fragment
-- [queries/region-egress-and-exposure-summary.kql](queries/region-egress-and-exposure-summary.kql) when run once per covered VNet or scope fragment
-- [queries/rule-candidates-summary.kql](queries/rule-candidates-summary.kql) after the VNet scope is narrowed
-- [queries/existing-east-west-candidates.kql](queries/existing-east-west-candidates.kql)
-- [queries/existing-internet-egress-candidates.kql](queries/existing-internet-egress-candidates.kql)
-- [queries/existing-inbound-exposure-candidates.kql](queries/existing-inbound-exposure-candidates.kql)
-- [queries/existing-recommended-rules.kql](queries/existing-recommended-rules.kql)
-
-### Optional all-VNet diagram or summary inputs
-
-Use these only when the customer wants a traffic-flow diagram or a high-level cross-VNet view. Do not use them as the primary evidence source for final firewall-rule generation.
-
-- [queries/region-internal-traffic-summary.kql](queries/region-internal-traffic-summary.kql) when intentionally summarized across all covered VNets for a diagram or reviewer visualization
-- [queries/region-egress-and-exposure-summary.kql](queries/region-egress-and-exposure-summary.kql) when intentionally summarized across all covered VNets for a diagram or reviewer visualization
+# NSG rules
+az deployment group create -g <rg> \
+  -f infra/modules/nsg-observed-rules.bicep \
+  -p location='westeurope' subnets=@requests/<ts>/nsg-rules.json
+```
 
 ## Cost note
 

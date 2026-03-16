@@ -6,8 +6,8 @@ agent: "Discovery"
 ---
 Analyze the internal Azure traffic for the approved workspace and region.
 
-Use [queries/region-internal-traffic-summary.kql](../../queries/region-internal-traffic-summary.kql) as the reusable query pattern and reuse the evidence language from [simplified-traffic-flows.md](../../simplified-traffic-flows.md).
-Replace the query template `lookback` value with the selected timeframe before execution.
+Query `NTANetAnalytics` for internal traffic and reuse the evidence language from [simplified-traffic-flows.md](../../simplified-traffic-flows.md).
+Replace the `lookback` value with the selected timeframe before execution.
 If multiple covered VNets remain in scope, run the query once per covered VNet or resource scope fragment so the `scopeHint` stays explicit.
 Keep the returned findings segmented by that explicit per-VNet or per-scope execution rather than merging them into one blended summary.
 If the customer requested an all-covered-VNet traffic diagram, keep that artifact separate from the rule analysis narrative.

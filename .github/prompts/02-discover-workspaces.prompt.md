@@ -19,5 +19,5 @@ Use these rules:
 9. Keep the result concise and evidence-based.
 10. End with the exact customer question that asks the user to choose which candidate workspace should be used for the rest of the analysis.
 
-Use [queries/workspace-flow-log-coverage.kql](../../queries/workspace-flow-log-coverage.kql) and [queries/workspace-flow-log-freshness.kql](../../queries/workspace-flow-log-freshness.kql) as the reusable query contracts.
+Query `NTANetAnalytics` for coverage and freshness using inline KQL. The script `scripts/New-FirewallRulesFromTraffic.ps1` handles the full query-to-rules pipeline.
 If a query fails because a workspace schema differs from the template, rerun it with schema-safe equivalents and record that adaptation.

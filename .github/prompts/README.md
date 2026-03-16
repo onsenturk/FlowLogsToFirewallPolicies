@@ -61,33 +61,9 @@ Optional post-workshop step:
 - If output capture is requested, the drafting flow should also create `output-log-<region>.md` with substantive workflow outputs only, not the raw user prompts.
 - If a diagram is requested, the drafting flow should create `traffic-flow-diagram-<region>.md` as a separate optional artifact and keep it distinct from the rule-evidence contract.
 
-## Query roles
+## Query approach
 
-Use the KQL files by role so large workspaces stay on the per-VNet path after coverage is confirmed.
-
-### Discovery and coverage
-
-- [queries/workspace-flow-log-coverage.kql](../../queries/workspace-flow-log-coverage.kql)
-- [queries/workspace-flow-log-freshness.kql](../../queries/workspace-flow-log-freshness.kql)
-- [queries/verify-vnet-flow-log-coverage.kql](../../queries/verify-vnet-flow-log-coverage.kql)
-- [queries/verify-vnet-evidence-source.kql](../../queries/verify-vnet-evidence-source.kql)
-- [queries/existing-flow-logs-discovery.kql](../../queries/existing-flow-logs-discovery.kql)
-
-### Per-VNet analysis
-
-- [queries/region-internal-traffic-summary.kql](../../queries/region-internal-traffic-summary.kql) when run once per covered VNet or scope fragment
-- [queries/region-egress-and-exposure-summary.kql](../../queries/region-egress-and-exposure-summary.kql) when run once per covered VNet or scope fragment
-- [queries/recommended-rules-by-vnet.kql](../../queries/recommended-rules-by-vnet.kql)
-- [queries/rule-candidates-summary.kql](../../queries/rule-candidates-summary.kql) after the scope is narrowed
-- [queries/existing-east-west-candidates.kql](../../queries/existing-east-west-candidates.kql)
-- [queries/existing-internet-egress-candidates.kql](../../queries/existing-internet-egress-candidates.kql)
-- [queries/existing-inbound-exposure-candidates.kql](../../queries/existing-inbound-exposure-candidates.kql)
-- [queries/existing-recommended-rules.kql](../../queries/existing-recommended-rules.kql)
-
-### Optional all-VNet diagram or reviewer summary inputs
-
-- [queries/region-internal-traffic-summary.kql](../../queries/region-internal-traffic-summary.kql) when intentionally summarized across all covered VNets for a traffic-flow diagram
-- [queries/region-egress-and-exposure-summary.kql](../../queries/region-egress-and-exposure-summary.kql) when intentionally summarized across all covered VNets for a traffic-flow diagram
+All traffic analysis uses inline `NTANetAnalytics` queries via `scripts/New-FirewallRulesFromTraffic.ps1`. There are no standalone KQL files. The script handles discovery, classification, high-port prompting, and JSON output in a single command.
 
 ## Output contract
 
